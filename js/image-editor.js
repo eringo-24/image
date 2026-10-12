@@ -46,7 +46,14 @@ const ImageEditor = (() => {
      ファイル名（元データURL末尾の数字 + s / l）
      ============================================================ */
   function extractIdFromUrl(url) {
-    const s = String(url || "").trim().replace(/[?#].*$/, "").replace(/\/+$/, "");
+    // 全角数字・前後の空白/改行を吸収
+    const raw = String(url || "").trim()
+      .replace(/[０-９]/g, c => String.fromCharCode(c.charCodeAt(0) - 0xFEE0));
+    // 1) クエリの id=数字（例：detail.php?id=86692）を最優先
+    const q = raw.match(/[?&#]id=(\d{4,6})(?=$|[&#\s])/i);
+    if (q) return q[1];
+    // 2) 従来形式：パス末尾の数字（例：.../86692 や .../86692/）
+    const s = raw.replace(/[?#].*$/, "").replace(/\/+$/, "");
     const m = s.match(/(\d{4,6})$/);
     return m ? m[1] : "";
   }
