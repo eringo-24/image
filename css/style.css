@@ -1,0 +1,104 @@
+:root{
+  --paper:#f6f4ee;
+  --ink:#20232b;
+  --ink-soft:#5a5f6b;
+  --line:#d8d4c8;
+  --red:#c0392b;
+  --red-bg:#fbeceb;
+  --green:#2f6b4f;
+  --green-bg:#eaf3ee;
+  --amber:#8a6d1c;
+  --amber-bg:#faf3e0;
+  --blue:#1f5a8a;
+  --blue-bg:#e8f1f9;
+  --panel:#ffffff;
+}
+*{box-sizing:border-box;}
+[hidden]{display:none !important;}
+body{
+  margin:0;
+  background:var(--paper);
+  color:var(--ink);
+  font-family:"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+  line-height:1.7;
+}
+.wrap{max-width:1100px;margin:0 auto;padding:28px 20px 60px;}
+
+/* ---- ヘッダー ---- */
+header{display:flex;align-items:center;gap:14px;border-bottom:3px solid var(--ink);padding-bottom:14px;margin-bottom:20px;}
+header .mark{width:34px;height:34px;flex:none;border:2px solid var(--red);border-radius:50%;position:relative;}
+header .mark::after{content:"";position:absolute;left:7px;top:16px;width:20px;height:2.5px;background:var(--red);transform:rotate(-18deg);border-radius:2px;}
+header .mark::before{content:"";position:absolute;left:16px;top:8px;width:2.5px;height:16px;background:var(--red);transform:rotate(24deg);border-radius:2px;}
+h1{font-family:"Hiragino Mincho ProN","Yu Mincho",serif;font-size:26px;margin:0;letter-spacing:.04em;}
+header .sub{color:var(--ink-soft);font-size:13px;}
+
+/* ---- 共通部品 ---- */
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:18px 18px 20px;}
+.panel h2{font-size:13px;letter-spacing:.08em;color:var(--ink-soft);margin:0 0 14px;border-bottom:1px solid var(--line);padding-bottom:8px;}
+label{display:block;font-size:13px;font-weight:600;margin:0 0 6px;}
+input[type=text],select{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:3px;font-size:14px;background:#fff;font-family:inherit;}
+input[type=range]{width:100%;}
+.hint{font-size:11.5px;color:var(--ink-soft);margin-top:6px;}
+.ok-text{color:var(--green);} .ng-text{color:var(--red);}
+.info{font-size:12px;background:var(--blue-bg);color:var(--blue);border:1px solid #c7dced;border-radius:3px;padding:10px 12px;margin-bottom:16px;}
+.warn{font-size:12.5px;background:var(--red-bg);color:var(--red);border:1px solid #eccac6;border-radius:3px;padding:9px 12px;margin-top:10px;}
+.note{font-size:12.5px;background:var(--amber-bg);color:var(--amber);border:1px solid #ecdca6;border-radius:3px;padding:9px 12px;margin-top:10px;}
+.raw-error{background:var(--red-bg);border:1px solid #eccac6;color:var(--red);padding:12px;border-radius:3px;font-size:13px;white-space:pre-wrap;margin-top:10px;}
+.sep{border-top:1px dashed var(--line);margin:16px 0;}
+.status{font-size:13px;color:var(--ink-soft);}
+label.check{display:flex;align-items:center;gap:8px;font-weight:400;font-size:13px;margin:10px 0 0;}
+
+.runbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:12px;}
+.runbar.tight{margin-top:8px;gap:8px;}
+.runbar select,.runbar input[type=range]{width:auto;}
+.runbar label{margin:0;}
+button.run{background:var(--ink);color:#fff;border:none;padding:10px 20px;font-size:14px;font-weight:600;border-radius:3px;cursor:pointer;letter-spacing:.03em;font-family:inherit;}
+button.run.secondary{background:#fff;color:var(--ink);border:1px solid var(--line);padding:8px 14px;font-size:13px;}
+button.run:disabled{background:#9a9da5;color:#fff;opacity:.55;cursor:not-allowed;}
+button.run.secondary:disabled{background:#f1efe8;color:#9a9da5;}
+button.run:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--blue);outline-offset:2px;}
+
+/* ---- ① 元データ ---- */
+.source{margin-bottom:22px;}
+.source-grid{display:grid;grid-template-columns:1fr 1fr;gap:22px;}
+@media (max-width:760px){.source-grid{grid-template-columns:1fr;}}
+.drop{border:2px dashed var(--line);border-radius:4px;padding:12px;background:#fbfaf6;transition:border-color .15s,background .15s;}
+.drop.over{border-color:var(--blue);background:var(--blue-bg);}
+.drop input[type=file]{width:100%;font-size:13px;}
+.src-line{margin-top:14px;font-size:13px;}
+.src-line span{color:var(--ink-soft);margin-left:10px;}
+
+/* ---- ② カード ---- */
+.step-title{font-size:13px;font-weight:700;letter-spacing:.06em;color:var(--ink-soft);margin:0 0 10px;}
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:22px;align-items:start;}
+@media (max-width:1000px){.cards{grid-template-columns:1fr;}}
+.card .ctl{display:flex;align-items:center;gap:10px;margin-top:14px;}
+.card .ctl label{margin:0;flex:none;}
+.card .zoom-val{flex:none;width:48px;text-align:right;font-size:12.5px;color:var(--ink-soft);font-variant-numeric:tabular-nums;}
+
+/* キャンバスとガイド線：ガイドは「重ねた別要素」。キャンバスの画素には一切含まれない */
+.crop-stage{position:relative;display:inline-block;max-width:100%;line-height:0;border:1px solid var(--line);background:#fff;}
+.crop-stage canvas{display:block;max-width:100%;height:auto;touch-action:none;cursor:grab;}
+.crop-stage canvas.grabbing{cursor:grabbing;}
+.crop-stage canvas.brushing{cursor:crosshair;}
+.crop-guide{position:absolute;left:0;right:0;border-top:2px dashed rgba(192,57,43,.7);pointer-events:none;}
+.crop-guide span{position:absolute;right:6px;top:2px;font-size:10.5px;line-height:1.4;color:var(--red);background:rgba(255,255,255,.8);padding:0 5px;border-radius:2px;}
+.crop-empty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--ink-soft);background:rgba(246,244,238,.85);pointer-events:none;line-height:1.6;}
+
+/* ---- 書き出し結果 ---- */
+.result-block{margin-top:20px;}
+.result-block h3{font-size:14px;margin:0 0 10px;padding-left:10px;border-left:4px solid var(--ink);}
+.result-body{display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap;}
+.result-img{width:150px;max-width:40%;height:auto;border:1px solid var(--line);background:#fff;}
+.result-body > div{flex:1;min-width:200px;}
+.fname{font-weight:700;font-size:15px;margin-bottom:4px;}
+ul.checks{list-style:none;margin:0;padding:0;font-size:12.5px;}
+ul.checks li{margin:3px 0;}
+ul.checks li.ok{color:var(--green);}
+ul.checks li.ng{color:var(--red);font-weight:600;}
+ul.checks li.warn{color:var(--amber);}
+ul.checks li.info{color:var(--ink-soft);}
+ul.checks.manual label.check{margin:2px 0;}
+
+.all{margin-top:22px;}
+.all .runbar{margin-top:0;}

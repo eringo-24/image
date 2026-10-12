@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>体験記 画像編集ツール</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="mark"></div>
+    <div>
+      <h1>体験記 画像編集ツール</h1>
+      <div class="sub">小画像（正方形）・大画像（3:2）のクロップ／余白／背景ぼかし／サイズ調整／ファイル名づけ</div>
+    </div>
+  </header>
+
+  <div class="info">
+    すべてブラウザの中だけで処理します。画像がサーバーや外部に送信されることはありません
+    （背景ぼかしを使う初回のみ、ぼかし用モデルをネットから読み込みます）。
+  </div>
+
+  <!-- ===================== 元データ ===================== -->
+  <section class="panel source">
+    <h2>① 元データ</h2>
+    <div class="source-grid">
+      <div>
+        <label for="recordUrl">元データのURL（末尾の数字からファイル名を自動生成）</label>
+        <input type="text" id="recordUrl" placeholder="https://m24portal.toshin.com/.../edit/12345" autocomplete="off">
+        <div id="idPreview" class="hint"></div>
+      </div>
+      <div>
+        <label for="imgFile">元画像</label>
+        <div id="dropZone" class="drop">
+          <input type="file" id="imgFile" accept="image/*">
+          <div class="hint">ここにドラッグ＆ドロップ／ファイル選択／Ctrl＋V（⌘＋V）で貼り付け</div>
+        </div>
+      </div>
+    </div>
+    <div id="sourceInfo"></div>
+  </section>
+
+  <!-- ===================== 小画像・大画像 ===================== -->
+  <div class="step-title">② 位置を決めて書き出し（小画像・大画像は別々に調整できます）</div>
+  <div id="cards" class="cards"></div>
+
+  <section class="panel all">
+    <div class="runbar">
+      <button type="button" class="run" id="exportAllBtn" disabled>小画像・大画像をまとめて書き出し</button>
+      <span class="status" id="exportAllStatus" aria-live="polite"></span>
+    </div>
+    <div class="hint">書き出した画像は左側のプレビューで実際の仕上がりを確認できます。保存後は、管理画面にアップロードする前に必ず目視で最終確認してください。</div>
+  </section>
+
+</div>
+
+<script src="js/image-editor.js"></script>
+<script src="js/image-app.js"></script>
+</body>
+</html>
