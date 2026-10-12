@@ -313,13 +313,13 @@
     const id = ImageEditor.extractIdFromUrl(urlInput.value);
     if (!urlInput.value.trim()) {
       idPreview.className = "hint";
-      idPreview.textContent = "URL末尾の数字（4〜6桁）をファイル名にします。例：12345 → 12345s.jpg ／ 12345l.jpg";
+      idPreview.textContent = "URLの id=数字（または末尾の数字、4〜6桁）をファイル名にします。例：12345 → 12345s.jpg ／ 12345l.jpg";
     } else if (id) {
       idPreview.className = "hint ok-text";
       idPreview.textContent = `ファイル名：${id}s.jpg（小）／ ${id}l.jpg（大）`;
     } else {
       idPreview.className = "hint ng-text";
-      idPreview.textContent = "URL末尾に4〜6桁の数字が見つかりません。このままだと「untitled」で保存されます。";
+      idPreview.textContent = "URLから4〜6桁のID（id=数字）が見つかりません。このままだと「untitled」で保存されます。";
     }
   }
   urlInput.addEventListener("input", updateIdPreview);
