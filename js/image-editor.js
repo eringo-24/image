@@ -349,14 +349,16 @@ const ImageEditor = (() => {
    * @param {number} [sourceKB]               元画像のファイルサイズ（KB）。これより大きくは書き出さない（水増し禁止）
    *
    * 方針（2026マニュアル ③-5 に準拠）：
-   *   1. まず標準品質(0.92)・縮小なしで保存。上限以内ならそのまま採用（＝「サイズ変更しない」）
-   *   2. 上限を超えるときだけ、縦横比を保ったまま縮小して上限以内で最も大きいサイズを二分探索
-   *      （マニュアルの「%を小さくして規定のサイズにする」に相当。毎回同じ結果になる）
-   *   3. 上限は min(規定の上限, 元画像のKB)。元画像より大きくなる水増しはしない
-   *   4. 下限(minKB)に届かないときは、水増しせず status:"under" で知らせる
+   *   1. 縮小なし・最高品質(0.98)で保存し、目標KB以内ならそのまま採用（水増しはしない）
+   *   2. 超えるときは、縮小せず品質だけを下げて「目標以内で最も高い品質」を探す（目標KBにぴったり近づく）
+   *   3. それでも収まらないときだけ、縦横比を保ったまま縮小（マニュアルの「%を小さくして規定のサイズにする」に相当）
+   *   4. 余白つきなどで目標−10KBより小さいときは、出力ピクセル数を増やして「目標−10KB〜目標」
+   *      （大画像なら90〜100KB／小画像なら40〜50KB）に収める
+   *   5. 上限は min(規定の上限, 元画像のKB)。元画像より大きくなる水増しはしない
+   *   6. 下限(minKB)に届かないときは、水増しせず status:"under" で知らせる
    */
   async function compressToSpec(sourceCanvas, spec, sourceKB) {
-    const Q_KEEP = 0.98, Q_SHRINK = 0.85, UP_MAX = 1.6; // UP_MAX：作業キャンバスを最大1.6倍まで大きくして目標に寄せる
+    const Q_MAX = 0.98, Q_MIN = 0.60, Q_SHRINK = 0.85;
     const capKB = (sourceKB && isFinite(sourceKB)) ? Math.min(spec.targetKB, sourceKB) : spec.targetKB;
     const toKB = b => b.size / 1024;
 
@@ -365,27 +367,42 @@ const ImageEditor = (() => {
       return { w: spec.rw * unit, h: spec.rh * unit };
     };
 
-    // 1) 縮小なし（品質は高めの0.98）
-    const full = await canvasToBlob(sourceCanvas, Q_KEEP);
-    if (toKB(full) <= capKB) {
-      // 余白つきなどで目標より10KB以上小さいときだけ、作業キャンバスを拡大して目標に近づける
-      // （元画像がもともと小さくて上限を下げているときは、水増し禁止なので拡大しない）
-      if (capKB >= spec.targetKB && toKB(full) < spec.targetKB - 10) {
-        let lo = 1, hi = UP_MAX, best = { b: full, w: sourceCanvas.width, h: sourceCanvas.height };
-        for (let i = 0; i < 8; i++) {
+    // 1) 縮小なし・最高品質で保存。目標以内ならそのまま採用（これ以上は水増しになるので大きくしない）
+    const top = await canvasToBlob(sourceCanvas, Q_MAX);
+    if (toKB(top) <= capKB) {
+      // 1') 余白が多いと平坦な部分が増えて、最高品質でも目標よりかなり小さくなる。
+      //     その場合だけ、縦横比を保ったまま出力ピクセル数を増やして目標KB付近に近づける
+      //     （元画像のKBが上限になっている場合は水増しになるので行わない）
+      const FLOOR = spec.targetKB - 10;                         // これ未満なら「小さすぎ」
+      if (capKB >= spec.targetKB && toKB(top) < FLOOR) {
+        let lo = 1, hi = 3, best = { b: top, w: sourceCanvas.width, h: sourceCanvas.height };
+        for (let i = 0; i < 10; i++) {
           const mid = (lo + hi) / 2;
           const { w, h } = sizeAt(mid);
-          const b = await canvasToBlob(resizeCanvas(sourceCanvas, w, h), Q_KEEP);
+          const b = await canvasToBlob(resizeCanvas(sourceCanvas, w, h), Q_MAX);
           if (toKB(b) <= capKB) { lo = mid; best = { b, w, h }; } else { hi = mid; }
         }
-        return finish(best.b, Q_KEEP, best.w, best.h);
+        return finish(best.b, Q_MAX, best.w, best.h);
       }
-      return finish(full, Q_KEEP, sourceCanvas.width, sourceCanvas.height);
+      return finish(top, Q_MAX, sourceCanvas.width, sourceCanvas.height);
     }
-    
-    // 2) 縮小して探す（lo: 上限以内に収まる倍率 / hi: 収まらない倍率）
+
+    // 2) 縮小せず、品質だけを下げて「目標以内で最も高い品質」を探す（目標KBにぴったり近づく）
+    let qlo = Q_MIN, qhi = Q_MAX, qBest = null;
+    const low = await canvasToBlob(sourceCanvas, Q_MIN);
+    if (toKB(low) <= capKB) {
+      qBest = { b: low, q: Q_MIN };
+      for (let i = 0; i < 9; i++) {
+        const q = (qlo + qhi) / 2;
+        const b = await canvasToBlob(sourceCanvas, q);
+        if (toKB(b) <= capKB) { qlo = q; qBest = { b, q }; } else { qhi = q; }
+      }
+      return finish(qBest.b, qBest.q, sourceCanvas.width, sourceCanvas.height);
+    }
+
+    // 3) 品質を下げても収まらないときだけ、縦横比を保ったまま縮小（lo: 収まる倍率 / hi: 収まらない倍率）
     let lo = 0.05, hi = 1, best = null;
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < 11; i++) {
       const mid = (lo + hi) / 2;
       const { w, h } = sizeAt(mid);
       const c = resizeCanvas(sourceCanvas, w, h);
@@ -404,6 +421,7 @@ const ImageEditor = (() => {
         blob, quality, kb, width, height,
         downscaled: width < sourceCanvas.width,
         cappedBySource: capKB < spec.targetKB,     // 元画像より大きくならないよう上限を下げた
+        nearTarget: kb >= spec.targetKB - 10 && kb <= spec.targetKB,   // 目標KBの「−10KB〜目標」（大画像なら90〜100KB）
         inBand: kb >= spec.minKB && kb <= spec.maxKB,
         status: kb > spec.maxKB ? "over" : (kb < spec.minKB ? "under" : "ok")
       };
