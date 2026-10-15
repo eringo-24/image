@@ -356,7 +356,7 @@ const ImageEditor = (() => {
    *   4. 下限(minKB)に届かないときは、水増しせず status:"under" で知らせる
    */
   async function compressToSpec(sourceCanvas, spec, sourceKB) {
-    const Q_KEEP = 0.92, Q_SHRINK = 0.85;
+    const Q_KEEP = 0.98, Q_SHRINK = 0.85, UP_MAX = 1.6; // UP_MAX：作業キャンバスを最大1.6倍まで大きくして目標に寄せる
     const capKB = (sourceKB && isFinite(sourceKB)) ? Math.min(spec.targetKB, sourceKB) : spec.targetKB;
     const toKB = b => b.size / 1024;
 
@@ -365,10 +365,24 @@ const ImageEditor = (() => {
       return { w: spec.rw * unit, h: spec.rh * unit };
     };
 
-    // 1) 縮小なし
+    // 1) 縮小なし（品質は高めの0.98）
     const full = await canvasToBlob(sourceCanvas, Q_KEEP);
-    if (toKB(full) <= capKB) return finish(full, Q_KEEP, sourceCanvas.width, sourceCanvas.height);
-
+    if (toKB(full) <= capKB) {
+      // 余白つきなどで目標より10KB以上小さいときだけ、作業キャンバスを拡大して目標に近づける
+      // （元画像がもともと小さくて上限を下げているときは、水増し禁止なので拡大しない）
+      if (capKB >= spec.targetKB && toKB(full) < spec.targetKB - 10) {
+        let lo = 1, hi = UP_MAX, best = { b: full, w: sourceCanvas.width, h: sourceCanvas.height };
+        for (let i = 0; i < 8; i++) {
+          const mid = (lo + hi) / 2;
+          const { w, h } = sizeAt(mid);
+          const b = await canvasToBlob(resizeCanvas(sourceCanvas, w, h), Q_KEEP);
+          if (toKB(b) <= capKB) { lo = mid; best = { b, w, h }; } else { hi = mid; }
+        }
+        return finish(best.b, Q_KEEP, best.w, best.h);
+      }
+      return finish(full, Q_KEEP, sourceCanvas.width, sourceCanvas.height);
+    }
+    
     // 2) 縮小して探す（lo: 上限以内に収まる倍率 / hi: 収まらない倍率）
     let lo = 0.05, hi = 1, best = null;
     for (let i = 0; i < 10; i++) {
