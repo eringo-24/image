@@ -176,9 +176,13 @@
         let oy = HEAD_GUIDE_RATIO * fh - headTop * sc;
         // 画像がフレームを覆える方向では、はみ出し（白い余白）が出ないよう範囲内に収める
         if (iw * sc >= fw) ox = Math.min(0, Math.max(fw - iw * sc, ox));
-        if (ih * sc >= fh) oy = Math.min(0, Math.max(fh - ih * sc, oy));
+        // 縦方向：下側だけ制限。上は、元画像に余白がないとき白い余白をつけてよい
+        oy = Math.max(fh - ih * sc, oy);
+        const addedMargin = oy > 0;
         stg.frozen = false; stg.scale = sc; stg.offsetX = ox; stg.offsetY = oy; stg.render();
-        st.textContent = "顔を検出：頭上の余白を自動調整しました";
+        st.textContent = addedMargin
+          ? "顔を検出：元画像に頭上の余白がないため、上に白い余白をつけました"
+          : "顔を検出：頭上の余白を自動調整しました";
       } catch (e) {
         st.style.color = "var(--ng, #c0392b)"; st.textContent = "顔検出を使えませんでした（ネット接続を確認してください）";
       } finally { btn.disabled = !state.img; }
