@@ -76,7 +76,6 @@
   <header class="hero">
     <div class="hero-text">
       <h1>合格体験記　画像編集ツール</h1>
-      <p class="sub">小画像（1:1）と大画像（3:2）をいっぺんに作れます</p>
     </div>
     <div class="hero-count" id="dayCount" hidden></div>
     <div class="hero-right">
@@ -90,7 +89,7 @@
 
   <!-- ===================== 進行ステップ ===================== -->
   <ol class="stepper" id="stepper" aria-label="作業の進み具合">
-    <li data-step="1" class="is-active"><span class="dot">1</span><span class="lbl">元データを入れる</span></li>
+    <li data-step="1" class="is-active"><span class="dot">1</span><span class="lbl">元画像をアップロード</span></li>
     <li data-step="2"><span class="dot">2</span><span class="lbl">位置を整える</span></li>
     <li data-step="3"><span class="dot">3</span><span class="lbl">書き出す</span></li>
   </ol>
@@ -103,10 +102,10 @@
 
   <!-- ===================== 元データ ===================== -->
   <section class="panel source" id="sourcePanel">
-    <h2><span class="ico" aria-hidden="true">1</span>元データ</h2>
+    <h2><span class="ico" aria-hidden="true">1</span>元画像をアップロード</h2>
     <div class="source-grid">
       <div>
-        <label for="recordUrl">元データのURL <small>（id=数字 から、ファイル名を自動で作ります）</small></label>
+        <label for="recordUrl">体験記管理画面のURL</label>
         <input type="text" id="recordUrl" placeholder="https://www.toshin.com/taikenki/detail.php?id=12345" autocomplete="off" inputmode="url">
         <div id="idPreview" class="hint"></div>
       </div>
@@ -124,7 +123,7 @@
   </section>
 
   <!-- ===================== 小画像・大画像 ===================== -->
-  <div class="step-title"><span class="ico" aria-hidden="true">2</span>位置を決めて書き出し <small>（小画像・大画像は別々に調整できます）</small></div>
+  <div class="step-title"><span class="ico" aria-hidden="true">2</span>位置を決めて書き出す</div>
   <div id="cards" class="cards"></div>
 
   <div class="end-note">書き出した画像は、カード内のプレビューで仕上がりを確認できます。管理画面にアップロードする前に、必ず目視で最終確認してください。</div>
