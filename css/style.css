@@ -101,9 +101,7 @@ h1{margin:0;font-size:clamp(20px,3.4vw,28px);font-weight:900;letter-spacing:.06e
 .sub{margin:2px 0 0;font-size:13px;color:var(--ink-soft);}
 .hero-count{background:var(--glass);border:1px solid var(--glass-edge);border-radius:999px;padding:5px 14px;font-size:13px;font-weight:700;color:var(--accent-deep);white-space:nowrap;}
 .hero-right{display:flex;align-items:center;gap:14px;}
-.rec{display:inline-flex;align-items:center;gap:7px;font-weight:900;font-size:14px;letter-spacing:.12em;color:var(--ink);}
-.rec-dot{width:12px;height:12px;border-radius:50%;background:#ff3b3b;box-shadow:0 0 10px rgba(255,59,59,.8);animation:rec 1.6s ease-in-out infinite;}
-@keyframes rec{0%,100%{opacity:1}50%{opacity:.35}}
+
 .theme-btn{
   width:40px;height:40px;border-radius:50%;display:grid;place-items:center;cursor:pointer;
   background:var(--glass);border:1px solid var(--glass-edge);color:var(--ink);
@@ -114,9 +112,9 @@ h1{margin:0;font-size:clamp(20px,3.4vw,28px);font-weight:900;letter-spacing:.06e
 :root[data-theme="dark"]  .theme-btn .i-sun{display:block;color:var(--ink);}
 
 /* ---------- ステップ表示 ---------- */
-.stepper{list-style:none;margin:16px 0 14px;padding:0;display:flex;gap:10px;flex-wrap:wrap;}
+.stepper{list-style:none;margin:16px 0 14px;padding:0;display:grid;grid-template-columns:1.6fr 1.1fr .8fr;gap:10px;}
 .stepper li{
-  flex:1;min-width:150px;display:flex;align-items:center;gap:10px;
+  min-width:0;white-space:nowrap;display:flex;align-items:center;gap:10px;
   background:var(--glass);border:1px solid var(--glass-edge);border-radius:12px;
   padding:7px 14px 7px 8px;color:var(--ink-soft);font-weight:700;font-size:13px;
   backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);transition:all .25s ease;
@@ -338,6 +336,11 @@ ul.checks.manual label.check{margin:4px 0;font-weight:700;}
 @media (prefers-reduced-motion: reduce){
   *,*::before,*::after{animation:none !important;transition:none !important;}
   html{scroll-behavior:auto;}
+}
+
+@media (min-width:700px){ h1{white-space:nowrap;} }
+@media (max-width:699px){
+  .stepper{grid-template-columns:1fr;}
 }
 
 /* ダークの金色ボタンは主ボタンだけ。サブボタンは明るい文字色に戻す */
