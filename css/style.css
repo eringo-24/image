@@ -170,15 +170,10 @@ body{
 /* ヘッダー：狭い画面 */
 @media (max-width:1180px){
   .topbar-in{flex-wrap:wrap;gap:12px 14px;}
-  .stepper{order:3;flex:1 1 100%;flex-wrap:wrap;}
+  .stepper{order:3;flex:1 1 100%;flex-wrap:wrap;gap:10px;}
+  .stepper li{padding:10px 20px 11px;font-size:14.5px;gap:10px;}   
 }
-/* 書き出し後に出る「今日◯枚できました」のバッジがあるときは、ステップを2段目に回す */
-@media (max-width:1500px){
-  .topbar-in:has(.hero-count:not([hidden])){flex-wrap:wrap;gap:12px 14px;}
-  .topbar-in:has(.hero-count:not([hidden])) .stepper{order:3;flex:1 1 100%;flex-wrap:wrap;}
-  .topbar-in:has(.hero-count:not([hidden])) .hero-count{margin-left:auto;}
-  .topbar-in:has(.hero-count:not([hidden])) .hero-right{margin-left:0;}
-}
+
 @media (max-width:560px){
   .topbar-in{gap:12px 10px;}
   .brand-main{font-size:22px;letter-spacing:.16em;}
