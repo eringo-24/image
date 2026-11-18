@@ -95,36 +95,45 @@ body{
 .viewfinder .br{right:0;bottom:0;border-right-width:3px;border-bottom-width:3px;border-bottom-right-radius:6px;}
 
 /* ---------- ヘッダー ---------- */
-.hero{display:flex;align-items:center;gap:16px;flex-wrap:wrap;padding:6px 4px 0;}
-.hero-text{flex:1;min-width:240px;}
-h1{margin:0;font-size:clamp(20px,3.4vw,28px);font-weight:900;letter-spacing:.06em;color:var(--ink);text-shadow:0 1px 8px rgba(255,255,255,.4);}
-.sub{margin:2px 0 0;font-size:13px;color:var(--ink-soft);}
-.hero-count{background:var(--glass);border:1px solid var(--glass-edge);border-radius:999px;padding:5px 14px;font-size:13px;font-weight:700;color:var(--accent-deep);white-space:nowrap;}
-.hero-right{display:flex;align-items:center;gap:14px;}
-
-.theme-btn{
-  width:40px;height:40px;border-radius:50%;display:grid;place-items:center;cursor:pointer;
-  background:var(--glass);border:1px solid var(--glass-edge);color:var(--ink);
-  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);box-shadow:var(--shadow);
+/* ---------- 固定ヘッダー（一次チェックツールと同じ構成） ---------- */
+.topbar{
+  position:sticky;top:0;z-index:45;
+  background:color-mix(in srgb,var(--bg) 80%,transparent);
+  -webkit-backdrop-filter:blur(16px) saturate(1.1);backdrop-filter:blur(16px) saturate(1.1);
+  border-bottom:1px solid var(--glass-edge);
 }
-.theme-btn svg{width:20px;height:20px;display:none;}
-:root[data-theme="light"] .theme-btn .i-moon{display:block;}
-:root[data-theme="dark"]  .theme-btn .i-sun{display:block;color:var(--ink);}
+.topbar-in{
+  max-width:1280px;margin:0 auto;
+  padding:22px clamp(18px,4vw,48px) 14px;
+  display:flex;align-items:center;gap:clamp(18px,3vw,44px);
+}
+h1{flex:none;margin:0;font-size:clamp(19px,2.2vw,26px);font-weight:900;letter-spacing:.06em;white-space:nowrap;}
+.hero-count{background:var(--glass);border:1px solid var(--glass-edge);border-radius:999px;padding:5px 14px;font-size:13px;font-weight:700;color:var(--accent-deep);white-space:nowrap;}
+.hero-right{margin-left:auto;display:flex;align-items:center;gap:10px;flex:none;}
 
-/* ---------- ステップ表示 ---------- */
-.stepper{list-style:none;margin:16px 0 14px;padding:0;display:grid;grid-template-columns:1.6fr 1.1fr .8fr;gap:10px;}
+/* ステップ：ぼかしは付けず、ほぼ不透明の背景にする */
+.stepper{
+  flex:1;min-width:0;list-style:none;margin:0;padding:0;
+  display:grid;grid-template-columns:1.6fr 1.1fr .8fr;gap:10px;
+}
 .stepper li{
   min-width:0;white-space:nowrap;display:flex;align-items:center;gap:10px;
-  background:var(--glass);border:1px solid var(--glass-edge);border-radius:12px;
-  padding:7px 14px 7px 8px;color:var(--ink-soft);font-weight:700;font-size:13px;
-  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);transition:all .25s ease;
+  background:color-mix(in srgb,var(--glass-strong) 70%,transparent);
+  border:1px solid var(--glass-edge);border-radius:12px;
+  padding:6px 14px 6px 8px;color:var(--ink-soft);font-weight:700;font-size:13px;
+  transition:border-color .25s ease, box-shadow .25s ease;
 }
-.stepper .dot{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;flex:none;background:var(--line);color:var(--ink);font-size:12.5px;}
-.stepper li.is-active{color:var(--ink);border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-soft);}
-.stepper li.is-active .dot{background:var(--accent);color:var(--btn-text);}
-.stepper li.is-done{color:var(--ok);border-color:var(--ok);}
-.stepper li.is-done .dot{background:var(--ok);color:var(--btn-text);font-size:0;}
-.stepper li.is-done .dot::before{content:"✓";font-size:14px;}
+/* .dot / .is-active / .is-done の指定は今のまま */
+
+@media (max-width:980px){   /* 2段に分ける */
+  .topbar-in{flex-wrap:wrap;gap:12px 14px;}
+  .hero-right{order:2;}
+  .stepper{order:3;flex:1 1 100%;}
+}
+@media (max-width:520px){   /* 文字は選択中のステップだけ */
+  .stepper li:not(.is-active) .lbl{display:none;}
+  .stepper li:not(.is-active){padding-right:8px;}
+}
 
 /* ---------- 共通部品 ---------- */
 .info{
