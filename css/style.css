@@ -2,6 +2,8 @@
    合格体験記 画像編集ツール  ―  カメラのファインダー風デザイン
    data-theme="light" / "dark"
    ============================================================ */
+
+/* ---------- 色・フォントの変数 ---------- */
 :root,
 :root[data-theme="light"]{
   --ink:#24364f;
@@ -14,13 +16,11 @@
   --accent:#3b82d6;
   --accent-deep:#2a64ad;
   --accent-soft:rgba(59,130,214,.14);
-  --pink:#3b82d6;
   --ok:#2a64ad;  --ok-soft:rgba(59,130,214,.13);
   --ng:#d03a52;  --ng-soft:rgba(208,58,82,.12);
   --warn:#946200; --warn-soft:rgba(240,180,40,.2);
   --info:#2a64ad; --info-soft:rgba(59,130,214,.14);
   --bracket:#fff;
-  --bracket-shadow:0 0 6px rgba(40,70,110,.45);
   --shadow:0 10px 30px rgba(60,100,160,.18);
   --bg:#dcebf8;
   --bg-img:
@@ -30,6 +30,7 @@
     linear-gradient(180deg,#e6f1fb 0%,#cfe2f5 100%);
   --btn-text:#fff;
   --font:"Noto Sans JP","Hiragino Kaku Gothic ProN","Yu Gothic","Meiryo",sans-serif;
+  --serif:"Shippori Mincho B1","Hiragino Mincho ProN","Yu Mincho",serif;
   --r:20px;
 }
 :root[data-theme="dark"]{
@@ -43,13 +44,11 @@
   --accent:#6fa8f0;
   --accent-deep:#4f8bd8;
   --accent-soft:rgba(111,168,240,.18);
-  --pink:#6fa8f0;
   --ok:#9cc6ff;  --ok-soft:rgba(111,168,240,.14);
   --ng:#ff8fa0;  --ng-soft:rgba(255,120,140,.15);
   --warn:#ffd36e; --warn-soft:rgba(255,200,90,.15);
   --info:#9cc6ff; --info-soft:rgba(111,168,240,.16);
   --bracket:#fff;
-  --bracket-shadow:0 0 8px rgba(0,0,0,.6);
   --shadow:0 12px 34px rgba(0,0,0,.45);
   --bg:#0b1630;
   --bg-img:
@@ -59,6 +58,7 @@
   --btn-text:#0a1a36;
 }
 
+/* ---------- 基本 ---------- */
 *{box-sizing:border-box;}
 [hidden]{display:none !important;}
 html{scroll-behavior:smooth;}
@@ -67,7 +67,7 @@ body{
   background-color:var(--bg);background-image:var(--bg-img);background-attachment:fixed;
   min-height:100vh;
 }
-.wrap{position:relative;z-index:1;max-width:1120px;margin:0 auto;padding:30px 28px 70px;}
+.wrap{position:relative;z-index:1;max-width:1280px;margin:0 auto;padding:38px clamp(18px,4vw,48px) 70px;}
 .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;}
 
 /* ---------- 背景の装飾（ボケ・ぼかした桜） ---------- */
@@ -94,54 +94,119 @@ body{
 .viewfinder .bl{left:0;bottom:0;border-left-width:3px;border-bottom-width:3px;border-bottom-left-radius:6px;}
 .viewfinder .br{right:0;bottom:0;border-right-width:3px;border-bottom-width:3px;border-bottom-right-radius:6px;}
 
-/* ---------- ヘッダー ---------- */
-/* ---------- 固定ヘッダー（一次チェックツールと同じ構成） ---------- */
+/* ============================================================
+   上部ヘッダー（一次チェックツール風・画面上部に固定）
+   ============================================================ */
 .topbar{
   position:sticky;top:0;z-index:45;
   background:color-mix(in srgb,var(--bg) 80%,transparent);
   -webkit-backdrop-filter:blur(16px) saturate(1.1);backdrop-filter:blur(16px) saturate(1.1);
-  border-bottom:1px solid var(--glass-edge);
+  border-bottom:1px solid color-mix(in srgb,var(--line) 70%,transparent);
+  box-shadow:0 10px 30px -22px rgba(26,29,74,.45);
 }
 .topbar-in{
   max-width:1280px;margin:0 auto;
   padding:22px clamp(18px,4vw,48px) 14px;
   display:flex;align-items:center;gap:clamp(18px,3vw,44px);
 }
-h1{flex:none;margin:0;font-size:clamp(19px,2.2vw,26px);font-weight:900;letter-spacing:.06em;white-space:nowrap;}
-.hero-count{background:var(--glass);border:1px solid var(--glass-edge);border-radius:999px;padding:5px 14px;font-size:13px;font-weight:700;color:var(--accent-deep);white-space:nowrap;}
-.hero-right{margin-left:auto;display:flex;align-items:center;gap:10px;flex:none;}
 
-/* ステップ：ぼかしは付けず、ほぼ不透明の背景にする */
-.stepper{
-  flex:1;min-width:0;list-style:none;margin:0;padding:0;
-  display:grid;grid-template-columns:1.6fr 1.1fr .8fr;gap:10px;
+/* タイトル：明朝の2段ロックアップ */
+.brand{margin:0;flex:none;display:flex;flex-direction:column;gap:6px;line-height:1;}
+.brand-main{
+  font-family:var(--serif);font-weight:800;
+  font-size:clamp(23px,2.3vw,28px);letter-spacing:.22em;padding-left:.04em;color:var(--ink);
 }
+.brand-sub{
+  display:flex;align-items:center;gap:7px;
+  font-family:var(--font);font-size:12px;font-weight:500;letter-spacing:.3em;color:var(--ink-soft);white-space:nowrap;
+}
+.brand-sub::after{content:"";height:1px;width:34px;background:linear-gradient(90deg,var(--line),transparent);}
+.brand-sub .cam{width:15px;height:15px;flex:none;color:var(--accent);}
+
+/* ステップ（立体的な横長ボタン。表示用でクリックはできない） */
+.stepper{flex:none;list-style:none;margin:0;padding:0;display:flex;gap:14px;}
 .stepper li{
-  min-width:0;white-space:nowrap;display:flex;align-items:center;gap:10px;
-  background:color-mix(in srgb,var(--glass-strong) 70%,transparent);
-  border:1px solid var(--glass-edge);border-radius:12px;
-  padding:6px 14px 6px 8px;color:var(--ink-soft);font-weight:700;font-size:13px;
-  transition:border-color .25s ease, box-shadow .25s ease;
+  flex:none;min-width:0;display:flex;align-items:center;gap:12px;white-space:nowrap;
+  padding:11px 30px 12px;border-radius:999px;font-size:15px;font-weight:500;letter-spacing:.06em;color:var(--ink);
+  background:linear-gradient(180deg,#fff 0%,#eef4fc 100%);border:1px solid rgba(255,255,255,.8);
+  box-shadow:0 8px 16px -8px rgba(26,29,74,.38),0 2px 3px rgba(26,29,74,.10),inset 0 1px 0 #fff;
 }
-/* .dot / .is-active / .is-done の指定は今のまま */
+.stepper .dot{color:var(--ink-soft);font-size:14px;font-weight:500;}
+.stepper li.is-active{
+  background:linear-gradient(180deg,#fff 0%,#eaf3ff 100%);color:var(--accent-deep);font-weight:700;border-color:#fff;
+  box-shadow:0 12px 22px -9px rgba(59,130,214,.5),0 2px 4px rgba(26,29,74,.10),inset 0 1px 0 #fff;
+}
+.stepper li.is-active .dot{color:var(--accent-deep);font-weight:700;}
+.stepper li.is-done .dot{color:var(--ok);}
 
-@media (max-width:980px){   /* 2段に分ける */
+/* 右側：他ツールへのリンク・モード切替 */
+.hero-count{background:var(--glass);border:1px solid var(--glass-edge);border-radius:999px;padding:5px 14px;font-size:13px;font-weight:700;color:var(--accent-deep);white-space:nowrap;}
+.hero-right{margin-left:auto;display:flex;align-items:center;gap:12px;flex:none;}
+.tool-link,.theme-btn{
+  background:linear-gradient(180deg,#fff 0%,#eef4fc 100%);border:1px solid rgba(255,255,255,.8);color:var(--ink);
+  box-shadow:0 8px 16px -8px rgba(26,29,74,.38),0 2px 3px rgba(26,29,74,.10),inset 0 1px 0 #fff;
+  cursor:pointer;transition:transform .18s,box-shadow .18s;
+}
+.tool-link{display:inline-flex;align-items:center;gap:6px;padding:11px 22px;border-radius:999px;font-size:14px;font-weight:700;text-decoration:none;white-space:nowrap;}
+.theme-btn{width:46px;height:46px;flex:none;border-radius:50%;display:grid;place-items:center;}
+.theme-btn svg{width:22px;height:22px;display:none;}
+:root[data-theme="light"] .theme-btn .i-moon{display:block;}
+:root[data-theme="dark"]  .theme-btn .i-sun{display:block;color:var(--ink);}
+.theme-btn:hover,.tool-link:hover{transform:translateY(-1px);}
+
+/* ヘッダー：ダーク */
+:root[data-theme="dark"] .stepper li,
+:root[data-theme="dark"] .tool-link,
+:root[data-theme="dark"] .theme-btn{
+  background:linear-gradient(180deg,rgba(255,255,255,.14) 0%,rgba(255,255,255,.06) 100%);border-color:rgba(255,255,255,.14);
+  box-shadow:0 10px 18px -8px rgba(0,0,0,.7),0 2px 3px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.18);
+}
+:root[data-theme="dark"] .stepper li.is-active{
+  background:linear-gradient(180deg,rgba(111,168,240,.32) 0%,rgba(111,168,240,.12) 100%);border-color:rgba(111,168,240,.5);color:#fff;
+  box-shadow:0 12px 22px -9px rgba(80,140,230,.55),0 2px 4px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.22);
+}
+:root[data-theme="dark"] .stepper li.is-active .dot{color:#fff;}
+
+/* ヘッダー：狭い画面 */
+@media (max-width:1180px){
   .topbar-in{flex-wrap:wrap;gap:12px 14px;}
-  .hero-right{order:2;}
-  .stepper{order:3;flex:1 1 100%;}
+  .stepper{order:3;flex:1 1 100%;flex-wrap:wrap;}
 }
-@media (max-width:520px){   /* 文字は選択中のステップだけ */
-  .stepper li:not(.is-active) .lbl{display:none;}
-  .stepper li:not(.is-active){padding-right:8px;}
+/* 書き出し後に出る「今日◯枚できました」のバッジがあるときは、ステップを2段目に回す */
+@media (max-width:1500px){
+  .topbar-in:has(.hero-count:not([hidden])){flex-wrap:wrap;gap:12px 14px;}
+  .topbar-in:has(.hero-count:not([hidden])) .stepper{order:3;flex:1 1 100%;flex-wrap:wrap;}
+  .topbar-in:has(.hero-count:not([hidden])) .hero-count{margin-left:auto;}
+  .topbar-in:has(.hero-count:not([hidden])) .hero-right{margin-left:0;}
 }
+@media (max-width:560px){
+  .topbar-in{gap:12px 10px;}
+  .brand-main{font-size:22px;letter-spacing:.16em;}
+  .brand-sub{letter-spacing:.2em;}
+  .stepper{gap:10px;}
+  .stepper li{padding:9px 18px 10px;font-size:13.5px;gap:8px;}
+  .hero-right{gap:8px;}
+  .tool-link{padding:0;width:46px;height:46px;justify-content:center;border-radius:50%;}
+  .tool-link span{display:none;}
+}
+
+/* ============================================================
+   セクション見出し（「01 /」＋日本語。一次チェックツールを踏襲）
+   ============================================================ */
+.view-head{max-width:980px;margin:0 0 22px;}
+.view-title{
+  display:flex;align-items:baseline;gap:.7em;
+  margin:0;font-size:24px;font-weight:800;letter-spacing:.08em;line-height:1.4;color:var(--ink);
+}
+.eyebrow{font-size:20px;font-weight:500;letter-spacing:.1em;line-height:1;color:var(--accent);margin:0;}
 
 /* ---------- 共通部品 ---------- */
 .info{
   display:flex;align-items:flex-start;gap:10px;font-size:12.8px;color:var(--info);
-  background:var(--info-soft);border:1px solid var(--line);border-radius:14px;padding:10px 16px;margin-bottom:18px;
+  background:var(--info-soft);border:1px solid var(--line);border-radius:14px;padding:10px 16px;margin:28px 0 0;
   backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
 }
-.info-i{flex:none;width:20px;height:20px;border-radius:50%;background:var(--accent);color:var(--btn-text);display:grid;place-items:center;font-weight:900;font-size:12px;font-style:normal;font-family:inherit;margin-top:1px;}
+.info-i{flex:none;width:20px;height:20px;border-radius:50%;background:var(--accent);color:var(--btn-text);display:grid;place-items:center;font-weight:900;font-size:12px;margin-top:1px;}
 .panel{
   background:var(--glass);border:1px solid var(--glass-edge);border-radius:var(--r);padding:20px 22px 22px;
   box-shadow:var(--shadow);backdrop-filter:blur(14px) saturate(1.2);-webkit-backdrop-filter:blur(14px) saturate(1.2);
@@ -184,6 +249,19 @@ button.run{
   box-shadow:0 4px 0 rgba(20,50,100,.55), 0 8px 16px rgba(30,70,140,.25);
   transition:transform .12s ease, box-shadow .12s ease, filter .12s ease;
 }
+button.run:hover:not(:disabled){filter:brightness(1.07);transform:translateY(-1px);}
+button.run:active:not(:disabled){transform:translateY(3px);box-shadow:0 1px 0 rgba(20,50,100,.55);}
+button.run:disabled{background:rgba(130,150,180,.3);color:var(--ink-soft);box-shadow:none;cursor:not-allowed;border:none;}
+button.run.secondary{
+  background:var(--field);color:var(--ink);padding:7px 15px;font-size:13px;
+  border:1px solid var(--line);box-shadow:0 3px 0 var(--line);
+}
+button.run.secondary:hover:not(:disabled){border-color:var(--accent);color:var(--accent-deep);}
+button.run.secondary:active:not(:disabled){transform:translateY(2px);box-shadow:0 1px 0 var(--line);}
+button.run.secondary:disabled{background:rgba(130,150,180,.15);border:1px solid var(--line);}
+button.run.big{font-size:15.5px;padding:12px 28px;border-radius:999px;}
+
+/* ダーク：主ボタンは濃い紺色に白文字 */
 :root[data-theme="dark"] button.run{
   color:#fff;background:linear-gradient(180deg,#2c4f9a 0%,#1b3677 55%,#122757 100%);
   border:1px solid rgba(160,190,240,.45);
@@ -191,19 +269,10 @@ button.run{
 }
 :root[data-theme="dark"] button.run:active:not(:disabled){box-shadow:inset 0 1px 0 rgba(255,255,255,.15),0 1px 0 #0a1738;}
 :root[data-theme="dark"] button.run:disabled{background:rgba(130,150,180,.25);color:var(--ink-soft);box-shadow:none;border:none;}
-button.run:hover:not(:disabled){filter:brightness(1.07);transform:translateY(-1px);}
-button.run:active:not(:disabled){transform:translateY(3px);box-shadow:0 1px 0 rgba(20,50,100,.55);}
-button.run.secondary{
-  background:var(--field);color:var(--ink);padding:7px 15px;font-size:13px;
-  border:1px solid var(--line);box-shadow:0 3px 0 var(--line);
-}
-:root[data-theme="dark"] button.run.secondary{background:var(--field);box-shadow:0 3px 0 rgba(160,185,225,.25);}
-button.run.secondary:active:not(:disabled){transform:translateY(2px);box-shadow:0 1px 0 var(--line);}
-button.run.secondary:hover:not(:disabled){border-color:var(--accent);color:var(--accent-deep);}
-:root[data-theme="dark"] button.run.secondary:hover:not(:disabled){color:var(--accent);}
-button.run.big{font-size:15.5px;padding:12px 28px;border-radius:999px;}
-:root[data-theme="light"] button.run.big button.run:disabled{background:rgba(130,150,180,.3);color:var(--ink-soft);box-shadow:none;cursor:not-allowed;border:none;}
-button.run.secondary:disabled{background:rgba(130,150,180,.15);border:1px solid var(--line);}
+:root[data-theme="dark"] button.run.secondary{color:var(--ink);background:var(--field);border:1px solid var(--line);box-shadow:0 3px 0 rgba(160,185,225,.25);}
+:root[data-theme="dark"] button.run.secondary:hover:not(:disabled){color:var(--accent);border-color:var(--accent);}
+:root[data-theme="dark"] button.run.secondary:disabled{color:var(--ink-soft);background:rgba(130,150,180,.15);border:1px solid var(--line);}
+
 button.mini{
   width:34px;height:34px;flex:none;border-radius:50%;border:1px solid var(--line);background:var(--field);
   font-size:18px;font-weight:800;color:var(--accent-deep);cursor:pointer;line-height:1;font-family:inherit;
@@ -221,8 +290,8 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;heigh
 input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:var(--accent);border:3px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.35);}
 input[type=range]:disabled{opacity:.45;cursor:not-allowed;}
 
-/* ---------- ① 元データ ---------- */
-.source{margin-bottom:26px;}
+/* ---------- 01 元画像を入れる ---------- */
+.source{margin-bottom:48px;}
 .source-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;}
 @media (max-width:760px){.source-grid{grid-template-columns:1fr;}}
 .drop{
@@ -243,24 +312,13 @@ input[type=range]:disabled{opacity:.45;cursor:not-allowed;}
 .src-line strong{word-break:break-all;}
 .src-line span{color:var(--ink-soft);}
 
-/* ---------- ② カード ---------- */
-.step-title{
-  display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:16px;font-weight:900;margin:4px 0 16px;
-  background:var(--glass);border:1px solid var(--glass-edge);border-radius:var(--r);padding:14px 22px;box-shadow:var(--shadow);
-  backdrop-filter:blur(14px) saturate(1.2);-webkit-backdrop-filter:blur(14px) saturate(1.2);
-}
-.step-title small{font-size:12.5px;font-weight:500;color:var(--ink-soft);}
+/* ---------- 02 小画像・大画像のカード ---------- */
 .cards{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start;}
 @media (max-width:1000px){.cards{grid-template-columns:1fr;}}
 /* カード見出しの絵文字はカメラのアイコンに置き換え（JSは変更なし） */
 .card h2 .ico{font-size:0;background:var(--accent);position:relative;width:28px;}
-.card h2 .ico::before{
-  content:"";position:absolute;inset:6px;border:2px solid var(--btn-text);border-radius:4px;
-}
-.card h2 .ico::after{
-  content:"";position:absolute;left:50%;top:50%;width:7px;height:7px;margin:-3.5px 0 0 -3.5px;border-radius:50%;background:var(--btn-text);
-}
-
+.card h2 .ico::before{content:"";position:absolute;inset:6px;border:2px solid var(--btn-text);border-radius:4px;}
+.card h2 .ico::after{content:"";position:absolute;left:50%;top:50%;width:7px;height:7px;margin:-3.5px 0 0 -3.5px;border-radius:50%;background:var(--btn-text);}
 .card .ctl{display:flex;align-items:center;gap:10px;margin-top:14px;}
 .card .ctl label{margin:0;flex:none;}
 .card .zoom-val{flex:none;width:52px;text-align:right;font-size:13px;font-weight:900;color:var(--accent-deep);font-variant-numeric:tabular-nums;}
@@ -292,10 +350,7 @@ input[type=range]:disabled{opacity:.45;cursor:not-allowed;}
 .crop-stage canvas.grabbing{cursor:grabbing;}
 .crop-stage canvas.brushing{cursor:crosshair;}
 .crop-guide{position:absolute;left:0;right:0;border-top:2px dashed rgba(255,255,255,.9);pointer-events:none;z-index:1;}
-.crop-guide span{display:none;
-  position:absolute;right:30px;top:4px;font-size:11px;line-height:1.5;font-weight:700;color:var(--accent-deep);
-  background:rgba(255,255,255,.92);padding:0 9px;border-radius:999px;
-}
+.crop-guide span{display:none;} /* 「頭上の余白（こぶし1個分）」の文字は非表示 */
 .crop-empty{
   position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
   font-size:13.5px;font-weight:700;color:var(--ink-soft);
@@ -314,7 +369,6 @@ input[type=range]:disabled{opacity:.45;cursor:not-allowed;}
 .result-block{margin-top:20px;background:var(--ok-soft);border:1px solid var(--ok);border-radius:16px;padding:16px;animation:pop .35s ease;}
 @keyframes pop{from{transform:scale(.97);opacity:0}to{transform:none;opacity:1}}
 .result-block h3{font-size:15px;margin:0 0 12px;font-weight:900;color:var(--ok);}
-
 .result-body{display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap;}
 .result-img{width:150px;max-width:40%;height:auto;border-radius:6px;border:2px solid #fff;box-shadow:var(--shadow);background:#fff;}
 .result-body > div{flex:1;min-width:210px;}
@@ -331,13 +385,12 @@ ul.checks.manual label.check{margin:4px 0;font-weight:700;}
 /* ---------- 下部 ---------- */
 .end-note{font-size:12.5px;color:var(--ink-soft);text-align:center;margin-top:22px;}
 @media (max-width:640px){
-  .wrap{padding:26px 18px 60px;}
+  .wrap{padding-top:28px;padding-bottom:60px;}
   .viewfinder{inset:6px;}
   .viewfinder .c{width:26px;height:26px;}
-  button.run.big{width:100%;}
 }
 
-/* ---------- 紙ふぶき ---------- */
+/* ---------- 紙ふぶき（非表示） ---------- */
 .confetti{display:none !important;position:fixed;inset:0;overflow:hidden;pointer-events:none;z-index:60;}
 .confetti span{position:absolute;top:-48px;animation:fall 2.2s ease-in forwards;}
 @keyframes fall{to{transform:translateY(112vh) rotate(540deg);opacity:.2;}}
@@ -345,112 +398,4 @@ ul.checks.manual label.check{margin:4px 0;font-weight:700;}
 @media (prefers-reduced-motion: reduce){
   *,*::before,*::after{animation:none !important;transition:none !important;}
   html{scroll-behavior:auto;}
-}
-
-@media (min-width:700px){ h1{white-space:nowrap;} }
-@media (max-width:699px){
-  .stepper{grid-template-columns:1fr;}
-}
-
-/* ダークの金色ボタンは主ボタンだけ。サブボタンは明るい文字色に戻す */
-:root[data-theme="dark"] button.run.secondary{color:var(--ink);background:var(--field);box-shadow:0 3px 0 rgba(160,185,225,.25);}
-:root[data-theme="dark"] button.run.secondary:hover:not(:disabled){color:var(--accent);}
-:root[data-theme="dark"] button.run.secondary:disabled{color:var(--ink-soft);background:rgba(130,150,180,.15);}
-
-.tool-link{display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border-radius:12px;font-size:13px;font-weight:700;text-decoration:none;white-space:nowrap;
-  color:var(--ink);background:var(--glass);border:1px solid var(--glass-edge);box-shadow:var(--shadow);
-  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);}
-.tool-link:hover{border-color:var(--accent);}
-
-/* ---------- ライト／ダーク切り替えボタン ---------- */
-.theme-btn{
-  width:40px;height:40px;flex:none;border-radius:50%;display:grid;place-items:center;cursor:pointer;
-  background:var(--glass);border:1px solid var(--glass-edge);color:var(--ink);
-  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);box-shadow:var(--shadow);
-}
-.theme-btn svg{width:20px;height:20px;display:none;}
-:root[data-theme="light"] .theme-btn .i-moon{display:block;}
-:root[data-theme="dark"]  .theme-btn .i-sun{display:block;color:var(--ink);}
-
-/* ============ 上部ヘッダー（一次チェックツール風） ============ */
-.topbar{
-  position:sticky;top:0;z-index:45;
-  background:color-mix(in srgb,var(--bg) 80%,transparent);
-  -webkit-backdrop-filter:blur(16px) saturate(1.1);backdrop-filter:blur(16px) saturate(1.1);
-  border-bottom:1px solid color-mix(in srgb,var(--line) 70%,transparent);
-  box-shadow:0 10px 30px -22px rgba(26,29,74,.45);
-}
-.topbar-in{
-  max-width:1280px;margin:0 auto;padding:22px clamp(18px,4vw,48px) 14px;
-  display:flex;align-items:center;gap:clamp(18px,3vw,44px);
-}
-.wrap{max-width:1280px;padding:38px clamp(18px,4vw,48px) 70px;}
-
-/* タイトル：明朝の2段ロックアップ */
-.brand{margin:0;flex:none;display:flex;flex-direction:column;gap:6px;line-height:1;font-size:inherit;letter-spacing:normal;text-shadow:none;}
-.brand-main{font-family:"Shippori Mincho B1","Hiragino Mincho ProN","Yu Mincho",serif;font-weight:800;font-size:clamp(23px,2.3vw,28px);letter-spacing:.22em;padding-left:.04em;color:var(--ink);}
-.brand-sub{display:flex;align-items:center;gap:7px;font-family:"Noto Sans JP",sans-serif;font-size:12px;font-weight:500;letter-spacing:.3em;color:var(--ink-soft);white-space:nowrap;}
-.brand-sub::after{content:"";height:1px;width:34px;background:linear-gradient(90deg,var(--line),transparent);}
-.brand-sub .cam{width:15px;height:15px;flex:none;color:var(--accent);}
-
-/* ステップ（立体的な横長ボタン） */
-.stepper{flex:none;list-style:none;margin:0;padding:0;display:flex;gap:14px;}
-.stepper li{
-  flex:none;min-width:0;display:flex;align-items:center;gap:12px;white-space:nowrap;
-  padding:11px 30px 12px;border-radius:999px;font-size:15px;font-weight:500;letter-spacing:.06em;color:var(--ink);
-  background:linear-gradient(180deg,#fff 0%,#eef4fc 100%);border:1px solid rgba(255,255,255,.8);
-  box-shadow:0 8px 16px -8px rgba(26,29,74,.38),0 2px 3px rgba(26,29,74,.10),inset 0 1px 0 #fff;
-  backdrop-filter:none;
-}
-.stepper .dot{width:auto;height:auto;background:none;border-radius:0;color:var(--ink-soft);font-size:14px;font-weight:500;}
-.stepper li.is-active{
-  background:linear-gradient(180deg,#fff 0%,#eaf3ff 100%);color:var(--accent-deep);font-weight:700;border-color:#fff;
-  box-shadow:0 12px 22px -9px rgba(59,130,214,.5),0 2px 4px rgba(26,29,74,.10),inset 0 1px 0 #fff;
-}
-.stepper li.is-active .dot{color:var(--accent-deep);font-weight:700;}
-.stepper li.is-done .dot{font-size:14px;color:var(--ok);}
-.stepper li.is-done .dot::before{content:"";}
-
-/* 右側：リンク・モード切替 */
-.hero-count{background:var(--glass);border:1px solid var(--glass-edge);border-radius:999px;padding:5px 14px;font-size:13px;font-weight:700;color:var(--accent-deep);white-space:nowrap;}
-.hero-right{margin-left:auto;display:flex;align-items:center;gap:12px;flex:none;}
-.tool-link,.theme-btn{
-  background:linear-gradient(180deg,#fff 0%,#eef4fc 100%);border:1px solid rgba(255,255,255,.8);color:var(--ink);
-  box-shadow:0 8px 16px -8px rgba(26,29,74,.38),0 2px 3px rgba(26,29,74,.10),inset 0 1px 0 #fff;
-  backdrop-filter:none;transition:transform .18s,box-shadow .18s;cursor:pointer;
-}
-.tool-link{display:inline-flex;align-items:center;gap:6px;padding:11px 22px;border-radius:999px;font-size:14px;font-weight:700;text-decoration:none;white-space:nowrap;}
-.theme-btn{width:46px;height:46px;flex:none;border-radius:50%;display:grid;place-items:center;}
-.theme-btn svg{width:22px;height:22px;display:none;}
-:root[data-theme="light"] .theme-btn .i-moon{display:block;}
-:root[data-theme="dark"]  .theme-btn .i-sun{display:block;color:var(--ink);}
-.theme-btn:hover,.tool-link:hover{transform:translateY(-1px);}
-
-/* ダーク */
-:root[data-theme="dark"] .stepper li,
-:root[data-theme="dark"] .tool-link,
-:root[data-theme="dark"] .theme-btn{
-  background:linear-gradient(180deg,rgba(255,255,255,.14) 0%,rgba(255,255,255,.06) 100%);border-color:rgba(255,255,255,.14);
-  box-shadow:0 10px 18px -8px rgba(0,0,0,.7),0 2px 3px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.18);
-}
-:root[data-theme="dark"] .stepper li.is-active{
-  background:linear-gradient(180deg,rgba(111,168,240,.32) 0%,rgba(111,168,240,.12) 100%);border-color:rgba(111,168,240,.5);color:#fff;
-  box-shadow:0 12px 22px -9px rgba(80,140,230,.55),0 2px 4px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.22);
-}
-:root[data-theme="dark"] .stepper li.is-active .dot{color:#fff;}
-
-/* 狭い画面 */
-@media (max-width:1180px){
-  .topbar-in{flex-wrap:wrap;gap:12px 14px;}
-  .stepper{order:3;flex:1 1 100%;flex-wrap:wrap;}
-}
-@media (max-width:560px){
-  .topbar-in{gap:12px 10px;}
-  .brand-main{font-size:22px;letter-spacing:.16em;}
-  .brand-sub{letter-spacing:.2em;}
-  .stepper{gap:10px;}
-  .stepper li{padding:9px 18px 10px;font-size:13.5px;gap:8px;}
-  .hero-right{gap:8px;}
-  .tool-link{padding:0;width:46px;height:46px;justify-content:center;border-radius:50%;}
-  .tool-link span{display:none;}
 }
