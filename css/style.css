@@ -345,6 +345,10 @@ input[type=range]:disabled{opacity:.45;cursor:not-allowed;}
 .crop-stage canvas.grabbing{cursor:grabbing;}
 .crop-stage canvas.brushing{cursor:crosshair;}
 .crop-guide{position:absolute;left:0;right:0;border-top:2px dashed rgba(255,255,255,.9);pointer-events:none;z-index:1;}
+:root[data-theme="light"] .crop-guide{
+  border-top-color:#4aa8f0;                         /* テーマの青に合う水色 */
+  filter:drop-shadow(0 0 1px rgba(255,255,255,.9)); /* 写真の上でも線が埋もれないよう白い縁取り */
+}
 .crop-guide span{display:none;} /* 「頭上の余白（こぶし1個分）」の文字は非表示 */
 .crop-empty{
   position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
