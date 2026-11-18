@@ -203,7 +203,7 @@
         ImageEditor.downloadBlob(r.blob, filename);
         this._showResult(r, filename, !!id);
         st.textContent = "ダウンロードしました。";
-        bumpCount();
+      
         setStep(3);
         if (!state.batch) burst();
         return true;
@@ -293,25 +293,6 @@
     document.body.appendChild(box);
     setTimeout(() => box.remove(), 2800);
   }
-
-  // 今日つくった枚数（この端末のブラウザにだけ保存。使えない環境でも動作に影響なし）
-  const dayCountEl = $("#dayCount");
-  const today = () => new Date().toISOString().slice(0, 10);
-  function readCount() {
-    try {
-      const v = JSON.parse(localStorage.getItem("taikenki-image-count") || "null");
-      return v && v.date === today() ? v.count : 0;
-    } catch (e) { return 0; }
-  }
-  function showCount() {
-    const n = readCount();
-    if (n > 0) { dayCountEl.hidden = false; dayCountEl.textContent = "🌟 今日 " + n + " 枚できました"; }
-  }
-  function bumpCount() {
-    try { localStorage.setItem("taikenki-image-count", JSON.stringify({ date: today(), count: readCount() + 1 })); } catch (e) { /* 保存できなくても続行 */ }
-    showCount();
-  }
-  showCount();
 
   /* ---------- カードを生成して並べる ---------- */
   const cards = Object.values(SPECS).map(spec => {
