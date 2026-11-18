@@ -344,3 +344,8 @@ ul.checks.manual label.check{margin:4px 0;font-weight:700;}
 :root[data-theme="dark"] button.run.secondary{color:var(--ink);background:var(--field);box-shadow:0 3px 0 rgba(160,185,225,.25);}
 :root[data-theme="dark"] button.run.secondary:hover:not(:disabled){color:var(--accent);}
 :root[data-theme="dark"] button.run.secondary:disabled{color:var(--ink-soft);background:rgba(130,150,180,.15);}
+
+.tool-link{display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border-radius:12px;font-size:13px;font-weight:700;text-decoration:none;white-space:nowrap;
+  color:var(--ink);background:var(--glass);border:1px solid var(--glass-edge);box-shadow:var(--shadow);
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);}
+.tool-link:hover{border-color:var(--accent);}
