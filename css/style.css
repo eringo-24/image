@@ -29,7 +29,7 @@
     radial-gradient(ellipse at 50% 100%, rgba(190,215,245,.9) 0, transparent 55%),
     linear-gradient(180deg,#e6f1fb 0%,#cfe2f5 100%);
   --btn-text:#fff;
-  --font:"Zen Maru Gothic","Hiragino Maru Gothic ProN","Hiragino Kaku Gothic ProN","Yu Gothic","Meiryo",sans-serif;
+  --font:"Noto Sans JP","Hiragino Kaku Gothic ProN","Yu Gothic","Meiryo",sans-serif;
   --r:20px;
 }
 :root[data-theme="dark"]{
@@ -134,7 +134,7 @@ h1{margin:0;font-size:clamp(20px,3.4vw,28px);font-weight:900;letter-spacing:.06e
   background:var(--info-soft);border:1px solid var(--line);border-radius:14px;padding:10px 16px;margin-bottom:18px;
   backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
 }
-.info-i{flex:none;width:20px;height:20px;border-radius:50%;background:var(--accent);color:var(--btn-text);display:grid;place-items:center;font-weight:900;font-size:12px;font-style:italic;font-family:serif;margin-top:1px;}
+.info-i{flex:none;width:20px;height:20px;border-radius:50%;background:var(--accent);color:var(--btn-text);display:grid;place-items:center;font-weight:900;font-size:12px;font-style:normal;font-family:inherit;margin-top:1px;}
 .panel{
   background:var(--glass);border:1px solid var(--glass-edge);border-radius:var(--r);padding:20px 22px 22px;
   box-shadow:var(--shadow);backdrop-filter:blur(14px) saturate(1.2);-webkit-backdrop-filter:blur(14px) saturate(1.2);
