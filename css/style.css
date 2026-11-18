@@ -1,0 +1,346 @@
+/* ============================================================
+   合格体験記 画像編集ツール  ―  カメラのファインダー風デザイン
+   data-theme="light" / "dark"
+   ============================================================ */
+:root,
+:root[data-theme="light"]{
+  --ink:#24364f;
+  --ink-soft:#5f7189;
+  --line:rgba(120,150,190,.35);
+  --glass:rgba(255,255,255,.58);
+  --glass-strong:rgba(255,255,255,.82);
+  --glass-edge:rgba(255,255,255,.9);
+  --field:rgba(255,255,255,.85);
+  --accent:#3b82d6;
+  --accent-deep:#2a64ad;
+  --accent-soft:rgba(59,130,214,.14);
+  --pink:#3b82d6;
+  --ok:#2a64ad;  --ok-soft:rgba(59,130,214,.13);
+  --ng:#d03a52;  --ng-soft:rgba(208,58,82,.12);
+  --warn:#946200; --warn-soft:rgba(240,180,40,.2);
+  --info:#2a64ad; --info-soft:rgba(59,130,214,.14);
+  --bracket:#fff;
+  --bracket-shadow:0 0 6px rgba(40,70,110,.45);
+  --shadow:0 10px 30px rgba(60,100,160,.18);
+  --bg:#dcebf8;
+  --bg-img:
+    radial-gradient(ellipse at 85% 0%, rgba(255,205,225,.85) 0, transparent 42%),
+    radial-gradient(ellipse at 10% 10%, rgba(255,255,255,.9) 0, transparent 40%),
+    radial-gradient(ellipse at 50% 100%, rgba(190,215,245,.9) 0, transparent 55%),
+    linear-gradient(180deg,#e6f1fb 0%,#cfe2f5 100%);
+  --btn-text:#fff;
+  --font:"Zen Maru Gothic","Hiragino Maru Gothic ProN","Hiragino Kaku Gothic ProN","Yu Gothic","Meiryo",sans-serif;
+  --r:20px;
+}
+:root[data-theme="dark"]{
+  --ink:#eaf1fb;
+  --ink-soft:#a9b9d0;
+  --line:rgba(160,185,225,.3);
+  --glass:rgba(18,30,58,.55);
+  --glass-strong:rgba(14,24,48,.82);
+  --glass-edge:rgba(170,195,240,.28);
+  --field:rgba(8,16,36,.55);
+  --accent:#6fa8f0;
+  --accent-deep:#4f8bd8;
+  --accent-soft:rgba(111,168,240,.18);
+  --pink:#6fa8f0;
+  --ok:#9cc6ff;  --ok-soft:rgba(111,168,240,.14);
+  --ng:#ff8fa0;  --ng-soft:rgba(255,120,140,.15);
+  --warn:#ffd36e; --warn-soft:rgba(255,200,90,.15);
+  --info:#9cc6ff; --info-soft:rgba(111,168,240,.16);
+  --bracket:#fff;
+  --bracket-shadow:0 0 8px rgba(0,0,0,.6);
+  --shadow:0 12px 34px rgba(0,0,0,.45);
+  --bg:#0b1630;
+  --bg-img:
+    radial-gradient(ellipse at 80% 0%, rgba(60,90,170,.55) 0, transparent 45%),
+    radial-gradient(ellipse at 10% 100%, rgba(40,70,140,.55) 0, transparent 50%),
+    linear-gradient(180deg,#0d1a38 0%,#08112a 100%);
+  --btn-text:#0a1a36;
+}
+
+*{box-sizing:border-box;}
+[hidden]{display:none !important;}
+html{scroll-behavior:smooth;}
+body{
+  margin:0;color:var(--ink);font-family:var(--font);line-height:1.7;
+  background-color:var(--bg);background-image:var(--bg-img);background-attachment:fixed;
+  min-height:100vh;
+}
+.wrap{position:relative;z-index:1;max-width:1120px;margin:0 auto;padding:30px 28px 70px;}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;}
+
+/* ---------- 背景の装飾（ボケ・ぼかした桜） ---------- */
+.decor{position:fixed;inset:0;overflow:hidden;pointer-events:none;z-index:0;}
+.bokeh{position:absolute;border-radius:50%;filter:blur(2px);}
+:root[data-theme="light"] .bokeh{background:radial-gradient(circle,rgba(255,255,255,.75),rgba(255,255,255,0) 70%);}
+:root[data-theme="dark"]  .bokeh{background:radial-gradient(circle,rgba(150,190,255,.45),rgba(110,160,240,0) 70%);}
+.b1{width:180px;height:180px;left:6%;top:62%;}
+.b2{width:120px;height:120px;left:30%;top:18%;opacity:.8;}
+.b3{width:230px;height:230px;right:12%;top:55%;opacity:.7;}
+.b4{width:90px;height:90px;left:62%;top:8%;}
+.b5{width:140px;height:140px;right:2%;top:30%;opacity:.8;}
+.blur-bl{position:absolute;width:180px;height:180px;filter:blur(5px);opacity:.75;}
+.bl1{right:-30px;top:-20px;width:240px;height:240px;}
+.bl2{right:170px;top:90px;width:120px;height:120px;filter:blur(8px);opacity:.55;}
+.bl3{right:20px;top:230px;width:150px;height:150px;filter:blur(10px);opacity:.5;}
+:root[data-theme="dark"] .blur-bl{display:none;}
+
+/* ---------- ファインダーの四隅（常に画面の四隅に固定） ---------- */
+.viewfinder{position:fixed;inset:12px;pointer-events:none;z-index:50;}
+.viewfinder .c{position:absolute;width:38px;height:38px;border:0 solid var(--bracket);filter:drop-shadow(0 0 3px rgba(40,70,110,.5));}
+.viewfinder .tl{left:0;top:0;border-left-width:3px;border-top-width:3px;border-top-left-radius:6px;}
+.viewfinder .tr{right:0;top:0;border-right-width:3px;border-top-width:3px;border-top-right-radius:6px;}
+.viewfinder .bl{left:0;bottom:0;border-left-width:3px;border-bottom-width:3px;border-bottom-left-radius:6px;}
+.viewfinder .br{right:0;bottom:0;border-right-width:3px;border-bottom-width:3px;border-bottom-right-radius:6px;}
+
+/* ---------- ヘッダー ---------- */
+.hero{display:flex;align-items:center;gap:16px;flex-wrap:wrap;padding:6px 4px 0;}
+.hero-text{flex:1;min-width:240px;}
+h1{margin:0;font-size:clamp(20px,3.4vw,28px);font-weight:900;letter-spacing:.06em;color:var(--ink);text-shadow:0 1px 8px rgba(255,255,255,.4);}
+.sub{margin:2px 0 0;font-size:13px;color:var(--ink-soft);}
+.hero-count{background:var(--glass);border:1px solid var(--glass-edge);border-radius:999px;padding:5px 14px;font-size:13px;font-weight:700;color:var(--accent-deep);white-space:nowrap;}
+.hero-right{display:flex;align-items:center;gap:14px;}
+.rec{display:inline-flex;align-items:center;gap:7px;font-weight:900;font-size:14px;letter-spacing:.12em;color:var(--ink);}
+.rec-dot{width:12px;height:12px;border-radius:50%;background:#ff3b3b;box-shadow:0 0 10px rgba(255,59,59,.8);animation:rec 1.6s ease-in-out infinite;}
+@keyframes rec{0%,100%{opacity:1}50%{opacity:.35}}
+.theme-btn{
+  width:40px;height:40px;border-radius:50%;display:grid;place-items:center;cursor:pointer;
+  background:var(--glass);border:1px solid var(--glass-edge);color:var(--ink);
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);box-shadow:var(--shadow);
+}
+.theme-btn svg{width:20px;height:20px;display:none;}
+:root[data-theme="light"] .theme-btn .i-moon{display:block;}
+:root[data-theme="dark"]  .theme-btn .i-sun{display:block;color:var(--ink);}
+
+/* ---------- ステップ表示 ---------- */
+.stepper{list-style:none;margin:16px 0 14px;padding:0;display:flex;gap:10px;flex-wrap:wrap;}
+.stepper li{
+  flex:1;min-width:150px;display:flex;align-items:center;gap:10px;
+  background:var(--glass);border:1px solid var(--glass-edge);border-radius:12px;
+  padding:7px 14px 7px 8px;color:var(--ink-soft);font-weight:700;font-size:13px;
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);transition:all .25s ease;
+}
+.stepper .dot{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;flex:none;background:var(--line);color:var(--ink);font-size:12.5px;}
+.stepper li.is-active{color:var(--ink);border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-soft);}
+.stepper li.is-active .dot{background:var(--accent);color:var(--btn-text);}
+.stepper li.is-done{color:var(--ok);border-color:var(--ok);}
+.stepper li.is-done .dot{background:var(--ok);color:var(--btn-text);font-size:0;}
+.stepper li.is-done .dot::before{content:"✓";font-size:14px;}
+
+/* ---------- 共通部品 ---------- */
+.info{
+  display:flex;align-items:flex-start;gap:10px;font-size:12.8px;color:var(--info);
+  background:var(--info-soft);border:1px solid var(--line);border-radius:14px;padding:10px 16px;margin-bottom:18px;
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+}
+.info-i{flex:none;width:20px;height:20px;border-radius:50%;background:var(--accent);color:var(--btn-text);display:grid;place-items:center;font-weight:900;font-size:12px;font-style:italic;font-family:serif;margin-top:1px;}
+.panel{
+  background:var(--glass);border:1px solid var(--glass-edge);border-radius:var(--r);padding:20px 22px 22px;
+  box-shadow:var(--shadow);backdrop-filter:blur(14px) saturate(1.2);-webkit-backdrop-filter:blur(14px) saturate(1.2);
+}
+.panel h2{display:flex;align-items:center;flex-wrap:wrap;gap:8px;font-size:16px;font-weight:900;margin:0 0 14px;color:var(--ink);}
+.ico{display:inline-grid;place-items:center;min-width:28px;height:28px;border-radius:8px;background:var(--accent);color:var(--btn-text);font-size:15px;font-weight:900;}
+.chip{font-size:12px;font-weight:700;border-radius:999px;padding:1px 11px;background:var(--accent-soft);color:var(--accent-deep);border:1px solid var(--line);}
+:root[data-theme="dark"] .chip{color:var(--accent);}
+label{display:block;font-size:13.5px;font-weight:700;margin:0 0 6px;}
+label small{font-weight:500;color:var(--ink-soft);}
+input[type=text],select{
+  width:100%;padding:10px 14px;border:1px solid var(--line);border-radius:12px;font-size:15px;
+  background:var(--field);font-family:inherit;color:var(--ink);transition:border-color .15s, box-shadow .15s;
+}
+input[type=text]::placeholder{color:var(--ink-soft);opacity:.75;}
+input[type=text]:focus,select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft);}
+input[type=text].invalid{border-color:var(--ng);background:var(--ng-soft);}
+select option{color:#24364f;}
+.hint{font-size:12.5px;color:var(--ink-soft);margin-top:7px;}
+.ok-text{color:var(--ok);font-weight:700;}
+.ng-text{color:var(--ng);font-weight:700;}
+.warn,.note,.raw-error{font-size:13px;border-radius:12px;padding:10px 14px;margin-top:12px;font-weight:500;}
+.warn{background:var(--ng-soft);color:var(--ng);border:1px solid var(--ng);}
+.note{background:var(--warn-soft);color:var(--warn);border:1px solid var(--warn);}
+.raw-error{background:var(--ng-soft);color:var(--ng);border:1px solid var(--ng);white-space:pre-wrap;}
+.sep{border-top:1px dashed var(--line);margin:18px 0;}
+.status{font-size:13px;color:var(--ink-soft);}
+label.check{display:flex;align-items:center;gap:9px;font-weight:500;font-size:13px;margin:12px 0 0;cursor:pointer;}
+input[type=checkbox]{width:18px;height:18px;accent-color:var(--accent);flex:none;}
+.runbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:12px;}
+.runbar.tight{margin-top:10px;gap:8px;}
+.runbar select,.runbar input[type=range]{width:auto;}
+.runbar label{margin:0;}
+
+/* ---------- ボタン（シャッターボタン風） ---------- */
+button.run{
+  font-family:inherit;font-weight:900;font-size:14px;letter-spacing:.04em;cursor:pointer;
+  border:none;border-radius:12px;padding:10px 22px;color:var(--btn-text);
+  background:linear-gradient(180deg,var(--accent),var(--accent-deep));
+  box-shadow:0 4px 0 rgba(20,50,100,.55), 0 8px 16px rgba(30,70,140,.25);
+  transition:transform .12s ease, box-shadow .12s ease, filter .12s ease;
+}
+:root[data-theme="dark"] button.run{
+  color:#fff;background:linear-gradient(180deg,#2c4f9a 0%,#1b3677 55%,#122757 100%);
+  border:1px solid rgba(160,190,240,.45);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.22), 0 4px 0 #0a1738, 0 8px 18px rgba(0,0,0,.45);
+}
+:root[data-theme="dark"] button.run:active:not(:disabled){box-shadow:inset 0 1px 0 rgba(255,255,255,.15),0 1px 0 #0a1738;}
+:root[data-theme="dark"] button.run:disabled{background:rgba(130,150,180,.25);color:var(--ink-soft);box-shadow:none;border:none;}
+button.run:hover:not(:disabled){filter:brightness(1.07);transform:translateY(-1px);}
+button.run:active:not(:disabled){transform:translateY(3px);box-shadow:0 1px 0 rgba(20,50,100,.55);}
+button.run.secondary{
+  background:var(--field);color:var(--ink);padding:7px 15px;font-size:13px;
+  border:1px solid var(--line);box-shadow:0 3px 0 var(--line);
+}
+:root[data-theme="dark"] button.run.secondary{background:var(--field);box-shadow:0 3px 0 rgba(160,185,225,.25);}
+button.run.secondary:active:not(:disabled){transform:translateY(2px);box-shadow:0 1px 0 var(--line);}
+button.run.secondary:hover:not(:disabled){border-color:var(--accent);color:var(--accent-deep);}
+:root[data-theme="dark"] button.run.secondary:hover:not(:disabled){color:var(--accent);}
+button.run.big{font-size:15.5px;padding:12px 28px;border-radius:999px;}
+:root[data-theme="light"] button.run.big button.run:disabled{background:rgba(130,150,180,.3);color:var(--ink-soft);box-shadow:none;cursor:not-allowed;border:none;}
+button.run.secondary:disabled{background:rgba(130,150,180,.15);border:1px solid var(--line);}
+button.mini{
+  width:34px;height:34px;flex:none;border-radius:50%;border:1px solid var(--line);background:var(--field);
+  font-size:18px;font-weight:800;color:var(--accent-deep);cursor:pointer;line-height:1;font-family:inherit;
+}
+:root[data-theme="dark"] button.mini{color:var(--accent);}
+button.mini:hover:not(:disabled){background:var(--accent-soft);}
+button.mini:disabled{opacity:.4;cursor:not-allowed;}
+button:focus-visible,input:focus-visible,select:focus-visible,.drop:focus-within{outline:3px solid var(--accent);outline-offset:3px;}
+
+/* ---------- スライダー ---------- */
+input[type=range]{width:100%;height:28px;background:transparent;-webkit-appearance:none;appearance:none;cursor:pointer;}
+input[type=range]::-webkit-slider-runnable-track{height:6px;border-radius:99px;background:var(--line);}
+input[type=range]::-moz-range-track{height:6px;border-radius:99px;background:var(--line);}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;margin-top:-7px;border-radius:50%;background:var(--accent);border:3px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.35);}
+input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:var(--accent);border:3px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.35);}
+input[type=range]:disabled{opacity:.45;cursor:not-allowed;}
+
+/* ---------- ① 元データ ---------- */
+.source{margin-bottom:26px;}
+.source-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;}
+@media (max-width:760px){.source-grid{grid-template-columns:1fr;}}
+.drop{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;text-align:center;
+  min-height:128px;margin:0;padding:16px;cursor:pointer;color:var(--ink);
+  border:2px dashed var(--line);border-radius:16px;background:var(--field);
+  transition:all .18s ease;font-weight:500;
+}
+.drop:hover{border-color:var(--accent);background:var(--accent-soft);}
+.drop.over{border-color:var(--accent);background:var(--accent-soft);transform:scale(1.01);}
+.drop-ico{line-height:1;color:var(--accent-deep);}
+:root[data-theme="dark"] .drop-ico{color:var(--accent);}
+.drop-main{font-size:15px;font-weight:900;}
+.drop-sub{font-size:12px;color:var(--ink-soft);}
+.drop.has-file{border-style:solid;border-color:var(--ok);background:var(--ok-soft);}
+.src-line{margin-top:16px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;font-size:13.5px;}
+.src-thumb{width:64px;height:64px;object-fit:cover;border-radius:10px;border:2px solid #fff;box-shadow:var(--shadow);}
+.src-line strong{word-break:break-all;}
+.src-line span{color:var(--ink-soft);}
+
+/* ---------- ② カード ---------- */
+.step-title{
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:16px;font-weight:900;margin:4px 0 16px;
+  background:var(--glass);border:1px solid var(--glass-edge);border-radius:var(--r);padding:14px 22px;box-shadow:var(--shadow);
+  backdrop-filter:blur(14px) saturate(1.2);-webkit-backdrop-filter:blur(14px) saturate(1.2);
+}
+.step-title small{font-size:12.5px;font-weight:500;color:var(--ink-soft);}
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start;}
+@media (max-width:1000px){.cards{grid-template-columns:1fr;}}
+/* カード見出しの絵文字はカメラのアイコンに置き換え（JSは変更なし） */
+.card h2 .ico{font-size:0;background:var(--accent);position:relative;width:28px;}
+.card h2 .ico::before{
+  content:"";position:absolute;inset:6px;border:2px solid var(--btn-text);border-radius:4px;
+}
+.card h2 .ico::after{
+  content:"";position:absolute;left:50%;top:50%;width:7px;height:7px;margin:-3.5px 0 0 -3.5px;border-radius:50%;background:var(--btn-text);
+}
+
+.card .ctl{display:flex;align-items:center;gap:10px;margin-top:14px;}
+.card .ctl label{margin:0;flex:none;}
+.card .zoom-val{flex:none;width:52px;text-align:right;font-size:13px;font-weight:900;color:var(--accent-deep);font-variant-numeric:tabular-nums;}
+:root[data-theme="dark"] .card .zoom-val{color:var(--accent);}
+.card .tools{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;}
+
+/* キャンバスとガイド線（ガイドは重ねた別要素。書き出した画像には写らない） */
+.crop-stage{
+  position:relative;display:block;width:fit-content;max-width:100%;margin:0 auto;line-height:0;
+  border-radius:6px;overflow:hidden;background:var(--field);
+  box-shadow:0 0 0 1px var(--line), 0 8px 20px rgba(0,0,0,.18);
+}
+/* ファインダーの四隅（画像の上に重ねる。操作は邪魔しない） */
+.crop-stage::after{
+  content:"";position:absolute;inset:8px;pointer-events:none;z-index:2;
+  --b:#fff;--l:22px;--w:3px;
+  background:
+    linear-gradient(var(--b),var(--b)) left top/var(--l) var(--w) no-repeat,
+    linear-gradient(var(--b),var(--b)) left top/var(--w) var(--l) no-repeat,
+    linear-gradient(var(--b),var(--b)) right top/var(--l) var(--w) no-repeat,
+    linear-gradient(var(--b),var(--b)) right top/var(--w) var(--l) no-repeat,
+    linear-gradient(var(--b),var(--b)) left bottom/var(--l) var(--w) no-repeat,
+    linear-gradient(var(--b),var(--b)) left bottom/var(--w) var(--l) no-repeat,
+    linear-gradient(var(--b),var(--b)) right bottom/var(--l) var(--w) no-repeat,
+    linear-gradient(var(--b),var(--b)) right bottom/var(--w) var(--l) no-repeat;
+  filter:drop-shadow(0 0 2px rgba(0,0,0,.55));
+}
+.crop-stage canvas{display:block;max-width:100%;height:auto;touch-action:none;cursor:grab;}
+.crop-stage canvas.grabbing{cursor:grabbing;}
+.crop-stage canvas.brushing{cursor:crosshair;}
+.crop-guide{position:absolute;left:0;right:0;border-top:2px dashed rgba(255,255,255,.9);pointer-events:none;z-index:1;}
+.crop-guide span{display:none;
+  position:absolute;right:30px;top:4px;font-size:11px;line-height:1.5;font-weight:700;color:var(--accent-deep);
+  background:rgba(255,255,255,.92);padding:0 9px;border-radius:999px;
+}
+.crop-empty{
+  position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
+  font-size:13.5px;font-weight:700;color:var(--ink-soft);
+  background:
+    radial-gradient(circle at 25% 30%,var(--accent-soft) 0,transparent 45%),
+    radial-gradient(circle at 78% 70%,var(--accent-soft) 0,transparent 40%),
+    var(--field);
+  pointer-events:none;line-height:1.6;text-align:center;padding:12px;
+}
+.crop-empty::before{
+  content:"";width:44px;height:32px;border:2px solid currentColor;border-radius:8px;opacity:.7;margin-bottom:4px;
+  background:radial-gradient(circle at 50% 50%,transparent 0 6px,currentColor 6px 8px,transparent 8px);
+}
+
+/* ---------- 書き出し結果 ---------- */
+.result-block{margin-top:20px;background:var(--ok-soft);border:1px solid var(--ok);border-radius:16px;padding:16px;animation:pop .35s ease;}
+@keyframes pop{from{transform:scale(.97);opacity:0}to{transform:none;opacity:1}}
+.result-block h3{font-size:15px;margin:0 0 12px;font-weight:900;color:var(--ok);}
+
+.result-body{display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap;}
+.result-img{width:150px;max-width:40%;height:auto;border-radius:6px;border:2px solid #fff;box-shadow:var(--shadow);background:#fff;}
+.result-body > div{flex:1;min-width:210px;}
+.fname{font-weight:900;font-size:17px;margin-bottom:6px;color:var(--ink);word-break:break-all;}
+ul.checks{list-style:none;margin:0;padding:0;font-size:13px;}
+ul.checks li{margin:5px 0;padding:6px 12px;border-radius:10px;}
+ul.checks li.ok{background:var(--ok-soft);color:var(--ok);font-weight:700;}
+ul.checks li.ng{background:var(--ng-soft);color:var(--ng);font-weight:700;}
+ul.checks li.warn{background:var(--warn-soft);color:var(--warn);margin-top:5px;border:none;}
+ul.checks li.info{background:var(--info-soft);color:var(--info);}
+ul.checks.manual li{background:transparent;padding:0;margin:2px 0;}
+ul.checks.manual label.check{margin:4px 0;font-weight:700;}
+
+/* ---------- 下部 ---------- */
+.end-note{font-size:12.5px;color:var(--ink-soft);text-align:center;margin-top:22px;}
+@media (max-width:640px){
+  .wrap{padding:26px 18px 60px;}
+  .viewfinder{inset:6px;}
+  .viewfinder .c{width:26px;height:26px;}
+  button.run.big{width:100%;}
+}
+
+/* ---------- 紙ふぶき ---------- */
+.confetti{display:none !important;position:fixed;inset:0;overflow:hidden;pointer-events:none;z-index:60;}
+.confetti span{position:absolute;top:-48px;animation:fall 2.2s ease-in forwards;}
+@keyframes fall{to{transform:translateY(112vh) rotate(540deg);opacity:.2;}}
+
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation:none !important;transition:none !important;}
+  html{scroll-behavior:auto;}
+}
+
+/* ダークの金色ボタンは主ボタンだけ。サブボタンは明るい文字色に戻す */
+:root[data-theme="dark"] button.run.secondary{color:var(--ink);background:var(--field);box-shadow:0 3px 0 rgba(160,185,225,.25);}
+:root[data-theme="dark"] button.run.secondary:hover:not(:disabled){color:var(--accent);}
+:root[data-theme="dark"] button.run.secondary:disabled{color:var(--ink-soft);background:rgba(130,150,180,.15);}
