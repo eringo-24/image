@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ja" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>合格体験記　画像編集ツール</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <radialGradient id="skGrad" cx="50%" cy="100%" r="100%" fx="50%" fy="100%">
+      <stop offset="0"   stop-color="#ff6b9d"/>
+      <stop offset=".5"  stop-color="#ffaac6"/>
+      <stop offset="1"   stop-color="#ffeaf2"/>
+    </radialGradient>
+    <linearGradient id="skGradSolo" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0"  stop-color="#ff8db3"/>
+      <stop offset="1"  stop-color="#ffe3ed"/>
+    </linearGradient>
+
+    <!-- 花びら1枚（先がハート形に切れ込んだ形） -->
+    <g id="skPetalShape">
+      <path d="M0,0 C-30,-20 -42,-62 -16,-92 L0,-76 L16,-92 C42,-62 30,-20 0,0Z"
+            fill="url(#skGrad)" stroke="rgba(255,255,255,.65)" stroke-width="1.2"/>
+      <path d="M0,-8 L0,-56 M-1,-30 L-12,-52 M1,-30 L12,-52" stroke="rgba(255,255,255,.45)"
+            stroke-width="1.1" fill="none" stroke-linecap="round"/>
+    </g>
+
+    <!-- 花（5枚＋しべ） -->
+    <symbol id="skBlossom" viewBox="-100 -100 200 200" overflow="visible">
+      <use href="#skPetalShape" transform="rotate(0)"/>
+      <use href="#skPetalShape" transform="rotate(72)"/>
+      <use href="#skPetalShape" transform="rotate(144)"/>
+      <use href="#skPetalShape" transform="rotate(216)"/>
+      <use href="#skPetalShape" transform="rotate(288)"/>
+      <circle r="13" fill="#fff4f8" opacity=".95"/>
+      <g stroke="#ff5c93" stroke-width="1.6" stroke-linecap="round">
+        <path d="M0,0 L0,-30"/><path d="M0,0 L28,-9"/><path d="M0,0 L17,24"/>
+        <path d="M0,0 L-17,24"/><path d="M0,0 L-28,-9"/>
+        <path d="M0,0 L14,-27"/><path d="M0,0 L-14,-27"/><path d="M0,0 L27,10"/><path d="M0,0 L-27,10"/>
+      </g>
+      <g fill="#ff3d7f">
+        <circle cx="0" cy="-31" r="2.6"/><circle cx="29" cy="-9" r="2.6"/><circle cx="17.5" cy="25" r="2.6"/>
+        <circle cx="-17.5" cy="25" r="2.6"/><circle cx="-29" cy="-9" r="2.6"/>
+        <circle cx="14.5" cy="-28" r="2.2"/><circle cx="-14.5" cy="-28" r="2.2"/>
+        <circle cx="28" cy="11" r="2.2"/><circle cx="-28" cy="11" r="2.2"/>
+      </g>
+      <circle r="5" fill="#ff77a2"/>
+    </symbol>
+
+    <!-- 散った花びら -->
+    <symbol id="skPetal" viewBox="-24 -36 48 72">
+      <path d="M0,34 C-26,15 -30,-19 -13,-34 L0,-23 L13,-34 C30,-19 26,15 0,34Z"
+            fill="url(#skGradSolo)" stroke="rgba(255,255,255,.7)" stroke-width="1"/>
+      <path d="M0,28 L0,-10" stroke="rgba(255,255,255,.5)" stroke-width="1" stroke-linecap="round"/>
+    </symbol>
+  </defs>
+</svg>
+
+<!-- カメラのファインダー風の装飾（操作の邪魔にならない） -->
+<div class="decor" aria-hidden="true">
+  <i class="bokeh b1"></i><i class="bokeh b2"></i><i class="bokeh b3"></i><i class="bokeh b4"></i><i class="bokeh b5"></i>
+  <svg class="blur-bl bl1"><use href="#skBlossom"/></svg>
+  <svg class="blur-bl bl2"><use href="#skBlossom"/></svg>
+  <svg class="blur-bl bl3"><use href="#skBlossom"/></svg>
+</div>
+<div class="viewfinder" aria-hidden="true"><i class="c tl"></i><i class="c tr"></i><i class="c bl"></i><i class="c br"></i></div>
+
+<div class="wrap">
+
+  <!-- ===================== ヘッダー ===================== -->
+  <header class="hero">
+    <div class="hero-text">
+      <h1>合格体験記　画像編集ツール</h1>
+      <p class="sub">小画像（1:1）と大画像（3:2）をいっぺんに作れます</p>
+    </div>
+    <div class="hero-count" id="dayCount" hidden></div>
+    <div class="hero-right">
+      <span class="rec"><i class="rec-dot"></i>REC</span>
+      <button type="button" class="theme-btn" id="themeBtn" aria-label="ライト／ダークを切り替え" title="ライト／ダークを切り替え">
+        <svg class="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+        <svg class="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- ===================== 進行ステップ ===================== -->
+  <ol class="stepper" id="stepper" aria-label="作業の進み具合">
+    <li data-step="1" class="is-active"><span class="dot">1</span><span class="lbl">元データを入れる</span></li>
+    <li data-step="2"><span class="dot">2</span><span class="lbl">位置を整える</span></li>
+    <li data-step="3"><span class="dot">3</span><span class="lbl">書き出す</span></li>
+  </ol>
+
+  <div class="info">
+    <span class="info-i" aria-hidden="true">i</span><span>
+    すべてブラウザの中だけで処理します。画像がサーバーや外部に送られることはありません
+    （背景ぼかしを使う最初の1回だけ、ぼかし用モデルをネットから読み込みます）。</span>
+  </div>
+
+  <!-- ===================== 元データ ===================== -->
+  <section class="panel source" id="sourcePanel">
+    <h2><span class="ico" aria-hidden="true">1</span>元データ</h2>
+    <div class="source-grid">
+      <div>
+        <label for="recordUrl">元データのURL <small>（id=数字 から、ファイル名を自動で作ります）</small></label>
+        <input type="text" id="recordUrl" placeholder="https://www.toshin.com/taikenki/detail.php?id=12345" autocomplete="off" inputmode="url">
+        <div id="idPreview" class="hint"></div>
+      </div>
+      <div>
+        <label for="imgFile">元画像</label>
+        <label id="dropZone" class="drop" for="imgFile">
+          <input type="file" id="imgFile" accept="image/*" class="sr-only">
+          <span class="drop-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2"/><circle cx="12" cy="12" r="3.2"/></svg></span>
+          <span class="drop-main">ここにドラッグ＆ドロップ</span>
+          <span class="drop-sub">クリックしてファイルを選ぶ／Ctrl＋V（⌘＋V）で貼り付けもできます</span>
+        </label>
+      </div>
+    </div>
+    <div id="sourceInfo"></div>
+  </section>
+
+  <!-- ===================== 小画像・大画像 ===================== -->
+  <div class="step-title"><span class="ico" aria-hidden="true">2</span>位置を決めて書き出し <small>（小画像・大画像は別々に調整できます）</small></div>
+  <div id="cards" class="cards"></div>
+
+  <div class="end-note">書き出した画像は、カード内のプレビューで仕上がりを確認できます。管理画面にアップロードする前に、必ず目視で最終確認してください。</div>
+
+</div>
+
+<script>
+/* ライト／ダーク切り替え（選択は localStorage に保存。使えない環境でも動作する） */
+(function(){
+  var root=document.documentElement,key="imgtool-theme";
+  try{var s=localStorage.getItem(key);if(s==="light"||s==="dark")root.dataset.theme=s;}catch(e){}
+  document.getElementById("themeBtn").addEventListener("click",function(){
+    var next=root.dataset.theme==="dark"?"light":"dark";
+    root.dataset.theme=next;
+    try{localStorage.setItem(key,next);}catch(e){}
+  });
+})();
+</script>
+<script src="js/image-editor.js"></script>
+<script src="js/image-app.js"></script>
+</body>
+</html>
