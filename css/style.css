@@ -140,7 +140,6 @@ body{
 .stepper li.is-done .dot{color:var(--ok);}
 
 /* 右側：他ツールへのリンク・モード切替 */
-.hero-count{background:var(--glass);border:1px solid var(--glass-edge);border-radius:999px;padding:5px 14px;font-size:13px;font-weight:700;color:var(--accent-deep);white-space:nowrap;}
 .hero-right{margin-left:auto;display:flex;align-items:center;gap:12px;flex:none;}
 .tool-link,.theme-btn{
   background:linear-gradient(180deg,#fff 0%,#eef4fc 100%);border:1px solid rgba(255,255,255,.8);color:var(--ink);
@@ -170,10 +169,11 @@ body{
 /* ヘッダー：狭い画面 */
 @media (max-width:1180px){
   .topbar-in{flex-wrap:wrap;gap:12px 14px;}
-  .stepper{order:3;flex:1 1 100%;flex-wrap:wrap;gap:10px;}
-  .stepper li{padding:10px 20px 11px;font-size:14.5px;gap:10px;}   
+  .stepper{order:3;flex:1 1 100%;flex-wrap:wrap;}
 }
-
+/* 書き出し後に出る「今日◯枚できました」のバッジがあるときは、ステップを2段目に回す */
+@media (max-width:1500px){
+}
 @media (max-width:560px){
   .topbar-in{gap:12px 10px;}
   .brand-main{font-size:22px;letter-spacing:.16em;}
@@ -344,11 +344,7 @@ input[type=range]:disabled{opacity:.45;cursor:not-allowed;}
 .crop-stage canvas{display:block;max-width:100%;height:auto;touch-action:none;cursor:grab;}
 .crop-stage canvas.grabbing{cursor:grabbing;}
 .crop-stage canvas.brushing{cursor:crosshair;}
-.crop-guide{position:absolute;left:0;right:0;border-top:2px dashed rgba(255,255,255,.9);pointer-events:none;z-index:1;}
-:root[data-theme="light"] .crop-guide{
-  border-top-color:#4aa8f0;                         /* テーマの青に合う水色 */
-  filter:drop-shadow(0 0 1px rgba(255,255,255,.9)); /* 写真の上でも線が埋もれないよう白い縁取り */
-}
+.crop-guide{position:absolute;left:0;right:0;border-top:2px dashed #4aa8f0;filter:drop-shadow(0 0 1px #fff);pointer-events:none;z-index:1;}
 .crop-guide span{display:none;} /* 「頭上の余白（こぶし1個分）」の文字は非表示 */
 .crop-empty{
   position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
@@ -398,3 +394,48 @@ ul.checks.manual label.check{margin:4px 0;font-weight:700;}
   *,*::before,*::after{animation:none !important;transition:none !important;}
   html{scroll-behavior:auto;}
 }
+
+
+/* ============ 新機能の見た目（画像編集ツール） ============ */
+/* 小・大の連動バー */
+.link-bar{
+  display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:-4px 0 18px;padding:12px 20px;
+  background:var(--glass);border:1px solid var(--glass-edge);border-radius:16px;box-shadow:var(--shadow);
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+}
+.link-bar .lb-ttl{font-weight:700;font-size:14.5px;}
+.link-bar .lb-sub{font-size:12.5px;color:var(--ink-soft);}
+.switch{position:relative;display:inline-block;width:46px;height:26px;margin:0;flex:none;}
+.switch input{position:absolute;opacity:0;inset:0;width:100%;height:100%;margin:0;cursor:pointer;z-index:1;}
+.switch i{position:absolute;inset:0;border-radius:999px;background:var(--line);transition:background .2s;box-shadow:inset 0 1px 3px rgba(0,0,0,.2);}
+.switch i::after{content:"";position:absolute;left:3px;top:3px;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 2px 5px rgba(0,0,0,.3);transition:transform .2s;}
+.switch input:checked + i{background:var(--accent);}
+.switch input:checked + i::after{transform:translateX(20px);}
+.chain{
+  position:absolute;left:50%;top:92px;transform:translateX(-50%);z-index:3;width:42px;height:42px;border-radius:50%;
+  display:grid;place-items:center;color:var(--accent-deep);
+  background:linear-gradient(180deg,#fff,#eef4fc);border:1px solid rgba(255,255,255,.9);box-shadow:0 8px 16px -8px rgba(26,29,74,.45);
+}
+:root[data-theme="dark"] .chain{color:var(--accent);background:linear-gradient(180deg,rgba(255,255,255,.18),rgba(255,255,255,.07));border-color:rgba(255,255,255,.2);}
+.chain svg{width:20px;height:20px;}
+@media (max-width:1000px){.chain{display:none;}}
+.cards{position:relative;}
+
+/* 顔検出 */
+.btn-face svg{width:16px;height:16px;margin:0 6px -3px 0;}
+.face-status{font-size:12.5px;color:var(--ok);font-weight:700;}
+/* 書き出し後の自動チェック */
+.autochk-ttl{display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:700;color:var(--ink-soft);margin:12px 0 4px;letter-spacing:.06em;}
+.autochk-ttl::after{content:"";flex:1;height:1px;background:var(--line);}
+.meter{display:inline-block;width:70px;height:6px;border-radius:99px;background:var(--line);vertical-align:middle;margin-left:8px;overflow:hidden;}
+.meter b{display:block;height:100%;background:var(--accent);border-radius:99px;}
+
+
+/* ============ カードの見出し：縦線＋文字（一次チェックツールの「設定」と同じ形） ============ */
+.card h2{gap:14px;margin:0 0 18px;font-size:20px;font-weight:700;letter-spacing:.1em;color:var(--accent);}
+.card h2 .ico{display:none;}
+.card h2::before{
+  content:"";flex:none;width:8px;height:32px;border-radius:6px;
+  background:linear-gradient(180deg,color-mix(in srgb,var(--accent) 70%,#fff),var(--accent));
+}
+.card h2 .chip{letter-spacing:.04em;}
