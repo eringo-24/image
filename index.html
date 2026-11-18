@@ -101,10 +101,12 @@
   
 <div class="wrap">
 
-  <!-- ===================== 元データ ===================== -->
-  <section class="panel source" id="sourcePanel">
-    <h2><span class="ico" aria-hidden="true">1</span>元画像をアップロード</h2>
-    <div class="source-grid">
+    <!-- ===================== 元データ ===================== -->
+    <header class="view-head">
+      <h2 class="view-title"><span class="eyebrow">01 &nbsp;/</span>元画像を入れる</h2>
+    </header>
+    <section class="panel source" id="sourcePanel">
+      <div class="source-grid">
       <div>
         <label for="recordUrl">体験記管理画面のURL</label>
         <input type="text" id="recordUrl" placeholder="https://www.toshin.com/taikenki/detail.php?id=12345" autocomplete="off" inputmode="url">
@@ -124,8 +126,10 @@
   </section>
 
   <!-- ===================== 小画像・大画像 ===================== -->
-  <div class="step-title"><span class="ico" aria-hidden="true">2</span>位置を決めて書き出す</div>
-  <div id="cards" class="cards"></div>
+    <header class="view-head">
+      <h2 class="view-title"><span class="eyebrow">02 &nbsp;/</span>位置を決めて書き出す</h2>
+    </header>
+    <div id="cards" class="cards"></div>
 
   <div class="end-note">書き出した画像は、カード内のプレビューで仕上がりを確認できます。管理画面にアップロードする前に、必ず目視で最終確認してください。</div>
   <p></p>
