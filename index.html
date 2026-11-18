@@ -6,7 +6,7 @@
 <title>合格体験記　画像編集ツール</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Shippori+Mincho+B1:wght@600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -72,10 +72,15 @@
 
 <header class="topbar">
   <div class="topbar-in">
-    <h1>合格体験記　画像編集ツール</h1>
+    <h1 class="brand" aria-label="合格体験記　画像編集ツール">
+      <span class="brand-main">合格体験記</span>
+      <span class="brand-sub">
+        <svg class="cam" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l1.5-2h7L17 8h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="3.4"/></svg>画像編集ツール
+      </span>
+    </h1>
 
     <ol class="stepper" id="stepper" aria-label="作業の進み具合">
-      <li data-step="1" class="is-active"><span class="dot">1</span><span class="lbl">元データを入れる</span></li>
+      <li data-step="1" class="is-active"><span class="dot">1</span><span class="lbl">元画像を入れる</span></li>
       <li data-step="2"><span class="dot">2</span><span class="lbl">位置を整える</span></li>
       <li data-step="3"><span class="dot">3</span><span class="lbl">書き出す</span></li>
     </ol>
