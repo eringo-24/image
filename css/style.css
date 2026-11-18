@@ -361,3 +361,13 @@ ul.checks.manual label.check{margin:4px 0;font-weight:700;}
   color:var(--ink);background:var(--glass);border:1px solid var(--glass-edge);box-shadow:var(--shadow);
   backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);}
 .tool-link:hover{border-color:var(--accent);}
+
+/* ---------- ライト／ダーク切り替えボタン ---------- */
+.theme-btn{
+  width:40px;height:40px;flex:none;border-radius:50%;display:grid;place-items:center;cursor:pointer;
+  background:var(--glass);border:1px solid var(--glass-edge);color:var(--ink);
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);box-shadow:var(--shadow);
+}
+.theme-btn svg{width:20px;height:20px;display:none;}
+:root[data-theme="light"] .theme-btn .i-moon{display:block;}
+:root[data-theme="dark"]  .theme-btn .i-sun{display:block;color:var(--ink);}
