@@ -20,6 +20,49 @@
   const sourceInfo = $("#sourceInfo");
   const cardsEl    = $("#cards");
 
+
+  /* ============================================================
+     顔検出（ブラウザ内。MediaPipe の顔検出モデルを、初めて使うときだけネットから読み込む。
+     画像そのものは外部に送られない）
+     ============================================================ */
+  const FaceFinder = {
+    _det: null,
+    async detect(img) {
+      if (typeof window.__detectFace === "function") return window.__detectFace(img); // テスト用の差し替え口
+      if (!this._det) {
+        const V = "0.10.14";
+        const mod = await import("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@" + V + "/vision_bundle.mjs");
+        const fileset = await mod.FilesetResolver.forVisionTasks("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@" + V + "/wasm");
+        this._det = await mod.FaceDetector.createFromOptions(fileset, {
+          baseOptions: { modelAssetPath: "https://storage.googleapis.com/mediapipe-models/face_detector/blaze_face_short_range/float16/1/blaze_face_short_range.tflite" },
+          runningMode: "IMAGE", minDetectionConfidence: 0.5
+        });
+      }
+      const res = this._det.detect(img);
+      const list = (res && res.detections) || [];
+      if (!list.length) return null;
+      // 一番大きい顔を使う
+      const b = list.map(d => d.boundingBox).sort((a, c) => c.width * c.height - a.width * a.height)[0];
+      return { x: b.originX, y: b.originY, w: b.width, h: b.height };
+    }
+  };
+
+  /* 書き出した画像の明るさ・鮮明さの簡易計測 */
+  function measureCanvas(canvas) {
+    const w = 240, h = Math.max(1, Math.round(240 * canvas.height / canvas.width));
+    const c = document.createElement("canvas"); c.width = w; c.height = h;
+    c.getContext("2d").drawImage(canvas, 0, 0, w, h);
+    const d = c.getContext("2d").getImageData(0, 0, w, h).data;
+    const g = new Float32Array(w * h); let sum = 0;
+    for (let i = 0; i < w * h; i++) { g[i] = 0.299 * d[i * 4] + 0.587 * d[i * 4 + 1] + 0.114 * d[i * 4 + 2]; sum += g[i]; }
+    let ls = 0, ls2 = 0, n = 0;
+    for (let y = 1; y < h - 1; y++) for (let x = 1; x < w - 1; x++) {
+      const i = y * w + x, l = 4 * g[i] - g[i - 1] - g[i + 1] - g[i - w] - g[i + w];
+      ls += l; ls2 += l * l; n++;
+    }
+    return { luma: sum / (w * h), lap: ls2 / n - (ls / n) * (ls / n) };
+  }
+
   /* ============================================================
      小画像／大画像カード
      ============================================================ */
@@ -31,7 +74,7 @@
       this.root = document.createElement("section");
       this.root.className = "panel card card-" + spec.key;
       this.root.innerHTML = `
-        <h2><span class="ico" aria-hidden="true">${spec.key === "small" ? "🌸" : "🪻"}</span>${spec.label}<span class="chip">${spec.ratioText}</span><span class="chip">${spec.targetKB}KB前後</span></h2>
+        <h2>${spec.label}<span class="chip">${spec.ratioText}</span><span class="chip">${spec.targetKB}KB前後</span></h2>
 
         <div class="crop-stage">
           <canvas width="${spec.w}" height="${spec.h}" aria-label="${spec.label}のクロップ画面"></canvas>
@@ -54,6 +97,10 @@
         <div class="runbar tight">
           <button type="button" class="run secondary btn-cover" disabled>フレームを埋める</button>
           <button type="button" class="run secondary btn-contain" disabled>全体を収める（余白あり）</button>
+        </div>
+        <div class="runbar tight">
+          <button type="button" class="run secondary btn-face" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="9" cy="10" r="1"/><circle cx="15" cy="10" r="1"/><path d="M8.5 15c1 1.2 2.2 1.8 3.5 1.8s2.5-.6 3.5-1.8"/></svg>顔に合わせる</button>
+          <span class="status face-status" aria-live="polite"></span>
         </div>
         <div class="hint">ドラッグで位置調整、ホイール・スライダー・−＋ボタンで拡大縮小。「全体を収める」と、余った部分は白い余白になります。</div>
 
@@ -84,7 +131,7 @@
       `;
       this.canvas = $("canvas", this.root);
       this.stage = new ImageEditor.CropStage(this.canvas);
-      this.stage.onChange = () => this._syncZoom();
+      this.stage.onChange = () => { this._syncZoom(); if (this.onView) this.onView(this); };
       this.stage.render(); // 白地を描いておく
       this._wire();
     }
@@ -108,6 +155,49 @@
       this.q(".brush-mode").addEventListener("change", e => this.refiner && this.refiner.setMode(e.target.value));
       this.q(".brush-size").addEventListener("input", () => this.refiner && this.refiner.setBrushSize(this._brushPx()));
       this.q(".btn-export").addEventListener("click", () => this.exportImage());
+      this.q(".btn-face").addEventListener("click", () => this.fitFace());
+    }
+
+    /* ----- 顔に合わせる（頭上の余白ガイド線に頭の上端を合わせ、顔の大きさを整える） ----- */
+    async fitFace() {
+      const st = this.q(".face-status"), btn = this.q(".btn-face");
+      if (!state.img) return;
+      btn.disabled = true; st.style.color = ""; st.textContent = "顔を探しています…（初回はモデルを読み込みます）";
+      try {
+        const box = await FaceFinder.detect(state.img);
+        if (!box) { this.face = null; st.style.color = "var(--ng, #c0392b)"; st.textContent = "顔を検出できませんでした。手動で調整してください"; return; }
+        this.face = box; // 元画像のピクセル座標 {x,y,w,h}
+        const stg = this.stage, fw = this.canvas.width, fh = this.canvas.height;
+        const iw = stg.img.naturalWidth, ih = stg.img.naturalHeight;
+        const headTop = box.y - box.h * 0.25;                 // 髪の分だけ、検出枠より少し上
+        let sc = ((this.spec.key === "small" ? 0.30 : 0.34) * fh) / box.h;
+        sc = Math.max(stg.baseScale, Math.min(stg.baseScale * stg.MAX_RATIO, sc));
+        let ox = fw / 2 - (box.x + box.w / 2) * sc;
+        let oy = HEAD_GUIDE_RATIO * fh - headTop * sc;
+        // 画像がフレームを覆える方向では、はみ出し（白い余白）が出ないよう範囲内に収める
+        if (iw * sc >= fw) ox = Math.min(0, Math.max(fw - iw * sc, ox));
+        if (ih * sc >= fh) oy = Math.min(0, Math.max(fh - ih * sc, oy));
+        stg.frozen = false; stg.scale = sc; stg.offsetX = ox; stg.offsetY = oy; stg.render();
+        st.textContent = "顔を検出：頭上の余白を自動調整しました";
+      } catch (e) {
+        st.style.color = "var(--ng, #c0392b)"; st.textContent = "顔検出を使えませんでした（ネット接続を確認してください）";
+      } finally { btn.disabled = !state.img; }
+    }
+
+    /* ----- 連動用：画像上の中心位置(0〜1)と拡大率(%) ----- */
+    getView() {
+      const g = this.stage; if (!g.img) return null;
+      return { cx: (this.canvas.width / 2 - g.offsetX) / (g.img.naturalWidth * g.scale),
+               cy: (this.canvas.height / 2 - g.offsetY) / (g.img.naturalHeight * g.scale),
+               zoom: g.zoomPercent };
+    }
+    setView(v) {
+      const g = this.stage; if (!g.img || g.frozen || !v) return;
+      const sc = g.baseScale * v.zoom / 100;
+      g.scale = sc;
+      g.offsetX = this.canvas.width / 2 - v.cx * g.img.naturalWidth * sc;
+      g.offsetY = this.canvas.height / 2 - v.cy * g.img.naturalHeight * sc;
+      g.render();
     }
 
     // ブラシの大きさ（スライダー値は表示幅480px基準 → 作業用キャンバスの画素数に換算）
@@ -164,7 +254,7 @@
       this._setZoomEnabled(true);
     }
     _setZoomEnabled(on) {
-      [".zoom", ".zoom-minus", ".zoom-plus", ".btn-cover", ".btn-contain"].forEach(c => { this.q(c).disabled = !on; });
+      [".zoom", ".zoom-minus", ".zoom-plus", ".btn-cover", ".btn-contain", ".btn-face"].forEach(c => { this.q(c).disabled = !on; });
     }
     _clearBlurUi() {
       if (this.refiner) { this.refiner.dispose(); this.refiner = null; }
@@ -203,7 +293,6 @@
         ImageEditor.downloadBlob(r.blob, filename);
         this._showResult(r, filename, !!id);
         st.textContent = "ダウンロードしました。";
-      
         setStep(3);
         if (!state.batch) burst();
         return true;
@@ -242,6 +331,40 @@
         ? `<li class="info">規定のKBに収めるため ${r.width}×${r.height}px に縮小しました（縦横比はそのまま）</li>`
         : "";
 
+
+      // ---- 自動チェック（顔の位置・見切れ・明るさ・鮮明さ） ----
+      const auto = [];
+      if (this.face) {
+        const g = this.stage, fw = this.canvas.width, fh = this.canvas.height;
+        const fx = this.face.x * g.scale + g.offsetX, fy = this.face.y * g.scale + g.offsetY;
+        const fW = this.face.w * g.scale, fH = this.face.h * g.scale;
+        const top = (fy - fH * 0.25) / fh;                       // 頭上の余白（フレーム高さに対する割合）
+        auto.push(top >= 0.04 && top <= 0.22
+          ? `<li class="ok">✔ 顔の位置：頭上の余白は適切です（約${Math.round(Math.max(0, top) * 100)}%）</li>`
+          : top < 0.04
+            ? `<li class="warn">！ 顔の位置：頭上の余白が少なめです。もう少し下げてください</li>`
+            : `<li class="warn">！ 顔の位置：頭上の余白が広めです。もう少し上げてください</li>`);
+        const cut = fx < 0 || fy < 0 || fx + fW > fw || fy + fH > fh;
+        auto.push(cut
+          ? `<li class="ng">✖ 顔の見切れ：顔が枠からはみ出しています。位置を見直してください</li>`
+          : `<li class="ok">✔ 顔の見切れ：ありません</li>`);
+      } else {
+        auto.push(`<li class="info">顔の位置・見切れ：「顔に合わせる」を押すと自動でチェックされます</li>`);
+      }
+      let m = null; try { m = measureCanvas(this.canvas); } catch (e) { /* 計測できなくても続行 */ }
+      if (m) {
+        auto.push(m.luma < 70
+          ? `<li class="warn">！ 明るさ：暗めです（平均 ${Math.round(m.luma)}/255）。元画像を確認してください</li>`
+          : m.luma > 205
+            ? `<li class="warn">！ 明るさ：明るすぎる可能性があります（平均 ${Math.round(m.luma)}/255）</li>`
+            : `<li class="ok">✔ 明るさ：問題ありません（平均 ${Math.round(m.luma)}/255）</li>`);
+        const up = this.stage.scale * (spec.refW / this.canvas.width) > 1.0001;
+        auto.push(up || m.lap < 15
+          ? `<li class="warn">！ 鮮明さ：${up ? "元画像を拡大しているため、粗く見える可能性があります" : "ぼやけている可能性があります"}。目視で確認してください</li>`
+          : `<li class="ok">✔ 鮮明さ：問題ありません</li>`);
+      }
+      const autoHtml = `<div class="autochk-ttl">自動チェック</div><ul class="checks">${auto.join("")}</ul>`;
+
       // 人の目で確認する項目（マニュアル「画像確認」）
       const manual = spec.key === "small"
         ? ["肩まで写っているか", "元画像と同じ生徒であるか"]
@@ -256,6 +379,7 @@
             <div>
               <div class="fname">${esc(filename)}</div>
               <ul class="checks">${idLine}${sizeLine}${ratioLine}${capLine}${scaleLine}</ul>
+              ${autoHtml}
               <div class="hint" style="margin-top:8px;">左の画像が実際に保存された内容です。目視で確認してください：</div>
               <ul class="checks manual">${manualHtml}</ul>
             </div>
@@ -265,7 +389,7 @@
   }
 
   /* ============================================================
-     見た目まわりの小さな工夫（ステップ表示・紙ふぶき・今日の枚数）
+     見た目まわりの小さな工夫（ステップ表示・紙ふぶき）
      ============================================================ */
   const stepperEl = $("#stepper");
   function setStep(n) {
@@ -299,6 +423,29 @@
     const c = new Card(spec);
     cardsEl.appendChild(c.root);
     return c;
+  });
+
+  /* ---------- 小画像・大画像の位置連動（初期設定はオフ） ---------- */
+  const linkToggle = $("#linkToggle"), linkSub = $("#linkSub");
+  const chain = document.createElement("div");
+  chain.className = "chain"; chain.hidden = true; chain.title = "連動中";
+  chain.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.07 0l3-3a5 5 0 0 0-7.07-7.07l-1.5 1.5"/><path d="M14 11a5 5 0 0 0-7.07 0l-3 3a5 5 0 0 0 7.07 7.07l1.5-1.5"/></svg>';
+  cardsEl.appendChild(chain);
+  let mirroring = false;
+  cards.forEach(c => {
+    c.onView = src => {
+      if (!linkToggle.checked || mirroring) return;
+      mirroring = true;
+      try { const v = src.getView(); cards.forEach(o => { if (o !== src) o.setView(v); }); }
+      finally { mirroring = false; }
+    };
+  });
+  linkToggle.addEventListener("change", () => {
+    chain.hidden = !linkToggle.checked;
+    linkSub.textContent = linkToggle.checked
+      ? "オンのときは、片方を動かすともう片方も同じ位置・拡大率になります"
+      : "オフのときは、小画像と大画像を別々に調整できます（初期設定）";
+    if (linkToggle.checked) cards[0].onView(cards[0]);   // オンにした瞬間、小画像に大画像を合わせる
   });
 
   /* ============================================================
