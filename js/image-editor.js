@@ -428,12 +428,53 @@ const ImageEditor = (() => {
     }
   }
 
-  function downloadBlob(blob, filename) {
+  /* ============================================================
+     保存：Chrome / Edge ではフォルダに直接書き込む（.crdownload を経由しないので壊れない）
+     小画像・大画像で保存先を別々に覚える（このページを開いている間だけ）
+     ※ フォルダ選択は「ボタンを押した直後」でないと開けないため、書き出しの最初に ensureSaveDir を呼ぶ
+     ============================================================ */
+  const saveDirHandles = {};
+
+  /** 戻り値: フォルダのハンドル／null=この方法は使えない（通常のダウンロードにする）／false=キャンセル */
+  async function ensureSaveDir(kind) {
+    if (!window.showDirectoryPicker) return null;
+    try {
+      let dir = saveDirHandles[kind];
+      if (dir) {
+        let perm = await dir.queryPermission({ mode: "readwrite" });
+        if (perm !== "granted") perm = await dir.requestPermission({ mode: "readwrite" });
+        if (perm !== "granted") dir = saveDirHandles[kind] = null;
+      }
+      if (!dir) {
+        dir = saveDirHandles[kind] = await window.showDirectoryPicker({ id: "taikenki-" + kind, mode: "readwrite", startIn: "downloads" });
+      }
+      return dir;
+    } catch (e) {
+      if (e && e.name === "AbortError") return false;   // 選択をキャンセル
+      saveDirHandles[kind] = null;                       // 選べないフォルダなど → 通常のダウンロードに切り替える
+      return null;
+    }
+  }
+
+  /** dir がフォルダなら直接書き込み、そうでなければ通常のダウンロード。戻り値は常に true */
+  async function downloadBlob(blob, filename, dir, kind) {
+    if (dir && dir.getFileHandle) {
+      try {
+        const fh = await dir.getFileHandle(filename, { create: true });
+        const w = await fh.createWritable();
+        await w.write(blob);
+        await w.close();
+        return true;
+      } catch (e) {
+        if (kind) saveDirHandles[kind] = null;           // 書き込めなかった → 次回は選び直し。今回は通常のダウンロード
+      }
+    }
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url; a.download = filename;
     document.body.appendChild(a); a.click(); a.remove();
-    setTimeout(() => URL.revokeObjectURL(url), 2000); // 直後に解放すると保存に失敗するブラウザがある
+    setTimeout(() => URL.revokeObjectURL(url), 60000); // 早く解放すると保存に失敗することがある
+    return true;
   }
 
   return {
@@ -441,6 +482,6 @@ const ImageEditor = (() => {
     extractIdFromUrl, buildFileName,
     loadImageFromFile, inspectSource,
     CropStage, BlurRefiner, makeBlurLayers,
-    compressToSpec, downloadBlob
+    compressToSpec, downloadBlob, ensureSaveDir
   };
 })();
