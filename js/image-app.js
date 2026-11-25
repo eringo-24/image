@@ -176,13 +176,9 @@
         let oy = HEAD_GUIDE_RATIO * fh - headTop * sc;
         // 画像がフレームを覆える方向では、はみ出し（白い余白）が出ないよう範囲内に収める
         if (iw * sc >= fw) ox = Math.min(0, Math.max(fw - iw * sc, ox));
-        // 縦方向：下側だけ制限。上は、元画像に余白がないとき白い余白をつけてよい
-        oy = Math.max(fh - ih * sc, oy);
-        const addedMargin = oy > 0;
+        if (ih * sc >= fh) oy = Math.min(0, Math.max(fh - ih * sc, oy));
         stg.frozen = false; stg.scale = sc; stg.offsetX = ox; stg.offsetY = oy; stg.render();
-        st.textContent = addedMargin
-          ? "顔を検出：元画像に頭上の余白がないため、上に白い余白をつけました"
-          : "顔を検出：頭上の余白を自動調整しました";
+        st.textContent = "顔を検出：頭上の余白を自動調整しました";
       } catch (e) {
         st.style.color = "var(--ng, #c0392b)"; st.textContent = "顔検出を使えませんでした（ネット接続を確認してください）";
       } finally { btn.disabled = !state.img; }
@@ -287,16 +283,23 @@
         }
       }
       btn.disabled = true;
-      st.textContent = "指定サイズに調整中…";
       try {
         const spec = this.spec;
+        // 保存先フォルダ（初回だけ選ぶ。小画像・大画像で別々）。ボタンを押した直後でないと開けないので最初に行う
+        st.textContent = "【" + spec.label + "】の保存先フォルダを選んでください";
+        const dir = await ImageEditor.ensureSaveDir(spec.key);
+        if (dir === false) {
+          st.textContent = "保存先の選択をキャンセルしました。もう一度「書き出し」を押してください。";
+          return false;
+        }
+        st.textContent = "指定サイズに調整中…";
         const r = await ImageEditor.compressToSpec(this.canvas, spec, state.sourceKB);
         const id = ImageEditor.extractIdFromUrl(urlInput.value);
         const filename = ImageEditor.buildFileName(id, spec.key);
 
-        ImageEditor.downloadBlob(r.blob, filename);
+        await ImageEditor.downloadBlob(r.blob, filename, dir, spec.key);
         this._showResult(r, filename, !!id);
-        st.textContent = "ダウンロードしました。";
+        st.textContent = "保存しました。";
         setStep(3);
         if (!state.batch) burst();
         return true;
